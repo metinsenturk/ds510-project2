@@ -9,5 +9,5 @@ Last of the model, we will use support vector machine to train our model and pro
 ## Before Contributing the Project
 I recommend the following two articles to read to understand how github works and how we can share the project. 
 
-1. To understand how github works, follow this [link](https://guides.github.com/introduction/flow/)
-2. To use git on your local machine, follow this [link](https://guides.github.com/introduction/git-handbook/)
+1. To understand how github works, follow this [link](https://guides.github.com/introduction/flow/).
+2. To use git on your local machine, follow this [link](https://guides.github.com/introduction/git-handbook/).
