@@ -10,4 +10,8 @@ Last of the model, we will use support vector machine to train our model and pro
 I recommend the following two articles to read to understand how github works and how we can share the project. 
 
 1. To understand how github works, follow this [link](https://guides.github.com/introduction/flow/).
-2. To use git on your local machine, follow this [link](https://guides.github.com/introduction/git-handbook/).
+2. To use git on your local machine, follow this [link](https://guides.github.com/introduction/git-handbook/). <sup>1</sup>
+3. To share ideas about the project, or track project status, go to [projects apge](https://github.com/metinsenturk/ds510-project2/projects/1)
+
+
+[^1]: After you set up your local machine on github, use git tab of RStudio. 
