@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1524002245168.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "24575021",
+    "id" : "2800C121",
+    "lastKnownWriteTime" : 1524002261,
+    "last_content_update" : 1524002261374,
+    "path" : "~/GitHub/ds510-project2/Scripts/yfl.R",
+    "project_path" : "Scripts/yfl.R",
+    "properties" : {
+        "cursorPosition" : "0,6",
+        "scrollLine" : "0",
+        "tempName" : "Untitled2"
+    },
+    "relative_order" : 5,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

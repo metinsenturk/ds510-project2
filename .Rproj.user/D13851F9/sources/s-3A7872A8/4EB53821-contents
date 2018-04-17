@@ -1,5 +1,0 @@
-# Logistic Regression Model
-
-test <- read.csv("./Dataset/Heart.csv")
-
-test

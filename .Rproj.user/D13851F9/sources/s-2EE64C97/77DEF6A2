@@ -1,21 +1,21 @@
 {
     "collab_server" : "",
     "contents" : "",
-    "created" : 1523998118257.000,
-    "dirty" : true,
+    "created" : 1524002035340.000,
+    "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
     "hash" : "0",
-    "id" : "4EB53821",
+    "id" : "77DEF6A2",
     "lastKnownWriteTime" : 1523921811,
-    "last_content_update" : 1523998582173,
+    "last_content_update" : 1523921811,
     "path" : "~/GitHub/ds510-project2/Scripts/glm-codes.R",
     "project_path" : "Scripts/glm-codes.R",
     "properties" : {
-        "cursorPosition" : "4,0",
+        "cursorPosition" : "4,4",
         "scrollLine" : "0"
     },
-    "relative_order" : 2,
+    "relative_order" : 3,
     "source_on_save" : false,
     "source_window" : "",
     "type" : "r_source"

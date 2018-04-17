@@ -1,0 +1,512 @@
+mpg_actual <- auto_test$mpg
+abs_errors <- abs(mpg_predict - mpg_actual)
+hist(abs_errors, breaks = 20, probability = T)
+abs_errors_sum <- sum(abs_errors)
+auto <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data", sep = "", header = F)
+colnames(auto) <- c("mpg", "cylinders", "displacement", "horsepower", "weight", "acceleration", "model year", "origin", "car name")
+str(auto)
+auto$horsepower <- as.numeric(auto$horsepower)
+auto_train <- auto[1:300, ]
+seq_train <- seq(-149,150, 1)
+auto_test <- auto[301:398, ]
+seq_test <- seq(-48,49, 1)
+pairs(~ mpg + displacement + horsepower + weight + acceleration, data = auto_train)
+# run a linear model.
+# model states that Expectation of Yis have a N(0, sigma^2) in the residuals.
+auto_model <- lm(formula =  mpg ~ cylinders, data = auto_train)
+summary(auto_model)
+par(mfrow=c(2,2), mar=c(3,4,4,2))
+#residuals
+summary(auto_model$residuals)
+#density
+plot(density(auto_model$residuals))
+#qqplot
+qqnorm(residuals(auto_model))
+qqline(residuals(auto_model))
+qqplot(seq_train, auto_model$residuals)
+#histogram
+hist(auto_model$residuals, breaks = 20, probability = T)
+norm_dist <- dnorm(seq_train, mean = mean(auto_model$residuals), sd = sd(auto_model$residuals))
+lines(seq_train, norm_dist, col = "red")
+# testing the model
+mpg_predict <- auto_test$displacement * auto_model$coefficients[2] + auto_model$coefficients[1]
+mpg_actual <- auto_test$mpg
+abs_errors <- abs(mpg_predict - mpg_actual)
+hist(abs_errors, breaks = 20, probability = T)
+abs_errors_sum <- sum(abs_errors)
+auto <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data", sep = "", header = F)
+colnames(auto) <- c("mpg", "cylinders", "displacement", "horsepower", "weight", "acceleration", "model year", "origin", "car name")
+str(auto)
+auto$horsepower <- as.numeric(auto$horsepower)
+auto_train <- auto[1:300, ]
+seq_train <- seq(-149,150, 1)
+auto_test <- auto[301:398, ]
+seq_test <- seq(-48,49, 1)
+pairs(~ mpg + displacement + horsepower + weight + acceleration, data = auto_train)
+# run a linear model.
+# model states that Expectation of Yis have a N(0, sigma^2) in the residuals.
+auto_model <- lm(formula =  mpg ~ cylinders, data = auto_train)
+summary(auto_model)
+par(mfrow=c(2,2), mar=c(3,4,4,2))
+#residuals
+summary(auto_model$residuals)
+#density
+plot(density(auto_model$residuals))
+#qqplot
+qqnorm(residuals(auto_model))
+qqline(residuals(auto_model))
+qqplot(seq_train, auto_model$residuals)
+#histogram
+hist(auto_model$residuals, breaks = 20, probability = T)
+norm_dist <- dnorm(seq_train, mean = mean(auto_model$residuals), sd = sd(auto_model$residuals))
+lines(seq_train, norm_dist, col = "red")
+# testing the model
+mpg_predict <- auto_test$displacement * auto_model$coefficients[2] + auto_model$coefficients[1]
+mpg_actual <- auto_test$mpg
+abs_errors <- abs(mpg_predict - mpg_actual)
+hist(abs_errors, breaks = 20, probability = T)
+abs_errors_sum <- sum(abs_errors)
+auto <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data", sep = "", header = F)
+colnames(auto) <- c("mpg", "cylinders", "displacement", "horsepower", "weight", "acceleration", "model year", "origin", "car name")
+str(auto)
+auto$horsepower <- as.numeric(auto$horsepower)
+auto_train <- auto[1:300, ]
+seq_train <- seq(-149,150, 1)
+auto_test <- auto[301:398, ]
+seq_test <- seq(-48,49, 1)
+pairs(~ mpg + displacement + horsepower + weight + acceleration, data = auto_train)
+# run a linear model.
+# model states that Expectation of Yis have a N(0, sigma^2) in the residuals.
+auto_model <- lm(formula =  mpg ~ cylinders, data = auto_train)
+summary(auto_model)
+par(mfrow=c(2,2), mar=c(3,4,4,2))
+summary(auto_model$residuals)
+plot(density(auto_model$residuals))
+qqnorm(residuals(auto_model))
+qqline(residuals(auto_model))
+qqplot(seq_train, auto_model$residuals)
+hist(auto_model$residuals, breaks = 20, probability = T)
+norm_dist <- dnorm(seq_train, mean = mean(auto_model$residuals), sd = sd(auto_model$residuals))
+lines(seq_train, norm_dist, col = "red")
+mpg_predict <- auto_test$displacement * auto_model$coefficients[2] + auto_model$coefficients[1]
+mpg_actual <- auto_test$mpg
+abs_errors <- abs(mpg_predict - mpg_actual)
+hist(abs_errors, breaks = 20, probability = T)
+abs_errors_sum <- sum(abs_errors)
+lm(mpg~weight+acceleration+displacement+horsepower,data=autompgdata)
+summary(Model_weightplusaccplusdisplushp)
+lm(mpg~weight+acceleration+displacement+horsepower,data=autompgdata)
+summary(auto_model_weightplusaccplusdisplushp)
+lm(mpg~weight+acceleration+displacement+horsepower,data=auto.mpg)
+summary(auto.mpg_weightplusaccplusdisplushp)
+lm(mpg~weight+acceleration+displacement+horsepower,data=auto.mpg)
+summary(auto.mpg)
+lm(mpg~weight+acceleration+displacement+horsepower,data=auto.mpg)
+summary(ff)
+ff=lm(mpg~weight+acceleration+displacement+horsepower,data=auto.mpg)
+summary(ff)
+ff_displusacc<-lm(mpg~displacement+acceleration,data=auto.mpg)
+summary(ff)
+auto_displusacc<-lm(mpg~displacement+acceleration,data=auto.mpg)
+summary(auto_displusacc)
+auto_weightplusacc<-lm(mpg~weight+acceleration,data=auto.mpg)
+summary(auto_weightplusacc)
+plot(auto.mpg$weight,Model_weightplusacc$residuals)
+plot(auto.mpg$acceleration,auto_weightplusacc$residuals)
+plot(auto$weight,Model_weightplusacc$residuals)
+plot(auto$acceleration,auto_weightplusacc$residuals)
+plot(auto.mpg$weight,auto_weightplusacc$residuals)
+plot(auto.mpg$acceleration,auto_weightplusacc$residuals)
+plot(auto.mpg$weight,auto_weightplusacc$residuals)
+plot(auto.mpg$acceleration,auto_weightplusacc$residuals)
+install.packages("corrplot")
+install.packages("car")
+install.packages("rcompanion")
+install.packages("leaps")
+library(corrplot)
+library(car)
+library(rcompanion)
+library(leaps)
+# internal functions ---------------------------------------------------------------
+reg <- function(d1, coefficients) {
+(coefficients[1] + d1 * coefficients[2])
+}
+reg2 <- function(d1, d2, coefficients) {
+(coefficients[1] + d1 * coefficients[2] + d2 * coefficients[3])
+}
+reg3 <- function(d1, d2, d3, coefficients) {
+(coefficients[1] + d1 * coefficients[2] + d2 * coefficients[3] + d3 * coefficients[4])
+}
+reg4 <- function(d1, d2, d3, d4, coefficients) {
+(coefficients[1] + d1 * coefficients[2] + d2 * coefficients[3] + d3 * coefficients[4] + d4 * coefficients[5])
+}
+grapher <- function(dataset) {
+seq_data <- seq(-401, 400, 1)
+# preperation for the graphs
+par(mfrow=c(1,3), mar=c(3,4,4,2))
+norm_dist <- dnorm(seq_data, mean = mean(dataset), sd = sd(dataset))
+# density
+plot(density(dataset), xlab = "", ylab = "", main = "Density")
+lines(seq_data, norm_dist, col = "Red")
+# qqplot
+qqnorm(dataset, xlab = "", ylab = "", main = "QQ Plots")
+qqline(dataset, col = "Red")
+# histogram
+hist(dataset, breaks = 20, probability = T, xlab = "Frequency", ylab = "Probability", main = "Distribution Histogram")
+lines(seq_data, norm_dist, col = "red")
+# adding title to par graph
+title("Residual's Graphs", outer = T)
+}
+graphsMultipleForTest <- function(model) {
+# testing
+mpg_predict <- unname(predict(object = model, newdata = auto_test[,3:7]))
+mpg_residuals <- abs(mpg_predict - auto_test$mpg)
+grapher(mpg_residuals)
+}
+graphsSingleForTest <- function(dataset, model) {
+mpg_predict <- reg(dataset, model$coefficients)
+mpg_residuals <- abs(mpg_predict - auto_test$mpg)
+grapher(mpg_residuals)
+}
+panel.cor <- function(x, y){
+usr <- par("usr"); on.exit(par(usr))
+par(usr = c(0, 1, 0, 1))
+r <- round(cor(x, y), digits=2)
+txt <- paste0("R = ", r)
+cex.cor <- 0.8/strwidth(txt)
+text(0.5, 0.5, txt, cex = cex.cor * r)
+}
+# importing data & cleaning ---------------------------------------------------------
+auto <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data", sep = "", header = F)
+colnames(auto) <- c("mpg", "cylinders", "displacement", "horsepower", "weight", "acceleration", "model year", "origin", "car name")
+# investigating the structure of data
+str(auto)
+# reformatting continuous variables
+auto$horsepower <- as.numeric(auto$horsepower)s
+# creating train and test data
+auto_train <- auto[1:300, ]
+auto_test <- auto[301:398, ]
+#dealing with outliers
+boxplot(auto_train[, c(3:6)], log = "y", las = 2, boxwex = 0.3)
+x <- auto_train$acceleration
+qnt <-quantile(x, probs=c(.25, .75))
+caps <- quantile(x, probs=c(.05, .95))
+h <- 1.5 * IQR(x)
+x[x < (qnt[1] - h)] <- caps[1]
+x[x > (qnt[2] + h)] <- caps[2]
+auto_train$acceleration <- x
+# univariate linear regression ------------------------------------------------------
+# plotting all
+pairs(~ mpg + displacement + horsepower + weight + acceleration, data = auto_train, lower.panel = panel.cor)
+corrplot(cor = cor(auto_train[,c(1,3:7)]), method = "number")
+# plotting individually
+auto_train.mpg.dp <- subset(auto_train, select = c("mpg", "displacement"))
+plot(auto_train.mpg.dp)
+auto_train.mpg.hp <- subset(auto_train, select = c("mpg", "horsepower"))
+plot(auto_train.mpg.hp)
+auto_train.mpg.we <- subset(auto_train, select = c("mpg", "weight"))
+plot(auto_train.mpg.we)
+auto_train.mpg.ac <- subset(auto_train, select = c("mpg", "acceleration"))
+plot(auto_train.mpg.ac)
+# training - displacement
+auto_model_dp <- lm(formula =  mpg ~ displacement, data = auto_train)
+# training - horsepower
+auto_model_hp <- lm(formula =  mpg ~ horsepower, data = auto_train)
+# training - weight
+auto_model_we <- lm(formula =  mpg ~ weight, data = auto_train)
+# training - acceleration
+auto_model_ac <- lm(formula =  mpg ~ acceleration, data = auto_train)
+# testing - displacement
+graphsSingleForTest(auto_test$displacement, auto_model_dp)
+# testing - horsepower
+graphsSingleForTest(auto_test$horsepower, auto_model_hp)
+# testing - weight
+graphsSingleForTest(auto_test$weight, auto_model_we)
+# testing - acceleration
+graphsSingleForTest(auto_test$acceleration, auto_model_ac)
+# multivariate linear regression ----------------------------------------------------
+# all =========================================
+# training  - displacement + horsepower + weight + acceleration
+auto_model_dp_hp_we_ac <- lm(formula =  mpg ~ displacement + horsepower + weight + acceleration, data = auto_train)
+# trivariate ==================================
+# training  -  horsepower + weight + acceleration
+auto_model_hp_we_ac <- lm(formula =  mpg ~ horsepower + weight + acceleration, data = auto_train)
+# training  - displacement + weight + acceleration
+auto_model_dp_we_ac <- lm(formula =  mpg ~ displacement + weight + acceleration, data = auto_train)
+# training  - displacement + horsepower + acceleration
+auto_model_dp_hp_ac <- lm(formula =  mpg ~ displacement + horsepower + acceleration, data = auto_train)
+# training  - displacement + horsepower + weight
+auto_model_dp_hp_we <- lm(formula =  mpg ~ displacement + horsepower + weight, data = auto_train)
+# bivariate ===================================
+# training  - displacement + horsepower
+auto_model_dp_hp <- lm(formula =  mpg ~ displacement + horsepower, data = auto_train)
+# training  - displacement + weight
+auto_model_dp_we <- lm(formula =  mpg ~ displacement + weight, data = auto_train)
+# training  - displacement + acceleration
+auto_model_dp_ac <- lm(formula =  mpg ~ displacement + acceleration, data = auto_train)
+# training  - horsepower + weight
+auto_model_hp_we <- lm(formula =  mpg ~ horsepower + weight, data = auto_train)
+# training  -  horsepower + acceleration
+auto_model_hp_ac <- lm(formula =  mpg ~ horsepower + acceleration, data = auto_train)
+# training  - weight + acceleration
+auto_model_we_ac <- lm(formula =  mpg ~ weight + acceleration, data = auto_train)
+# multivariate ================================
+auto_model <- auto_model_dp_hp_we_ac
+# trivariate ==================================
+auto_model <- auto_model_hp_we_ac
+auto_model <- auto_model_dp_we_ac
+auto_model <- auto_model_dp_hp_ac
+auto_model <- auto_model_dp_hp_we
+# bivariate ===================================
+auto_model <- auto_model_dp_hp
+auto_model <- auto_model_dp_we
+auto_model <- auto_model_dp_ac
+auto_model <- auto_model_hp_we
+auto_model <- auto_model_hp_ac
+auto_model <- auto_model_we_ac
+grapher(auto_model$residuals)
+graphsMultipleForTest(auto_model)
+auto_model <- list(model.1  = auto_model_ac,
+model.2  = auto_model_dp,
+model.3  = auto_model_hp,
+model.4  = auto_model_we,
+model.5  = auto_model_dp_hp,
+model.6  = auto_model_dp_we,
+model.7  = auto_model_dp_ac,
+model.8  = auto_model_hp_we,
+model.9  = auto_model_hp_ac,
+model.10 = auto_model_we_ac,
+model.11 = auto_model_dp_hp_we,
+model.12 = auto_model_dp_hp_ac,
+model.13 = auto_model_dp_we_ac,
+model.14 = auto_model_hp_we_ac,
+model.15 = auto_model_dp_hp_we_ac)
+sapply(auto_model, summary)
+sapply(auto_model, plot)
+boxplot(auto_train$acceleration)
+car::outlierTest(model = auto_model_we_ac)
+car::outlierTest(model = auto_model_dp_hp_ac)
+# testing - displacement
+graphsSingleForTest(auto_test$displacement, auto_model_dp)
+# training - weight
+auto_model_we <- lm(formula =  mpg ~ weight, data = auto_train)
+# testing - weight
+graphsSingleForTest(auto_test$weight, auto_model_we)
+# training - weight
+auto_model_we <- lm(formula =  mpg ~ weight, data = auto_train)
+grapher(auto_model_dp$residuals)
+car::outlierTest(model = auto_model_dp_hp_ac)
+# internal functions ---------------------------------------------------------------
+reg <- function(d1, coefficients) {
+(coefficients[1] + d1 * coefficients[2])
+}
+reg2 <- function(d1, d2, coefficients) {
+(coefficients[1] + d1 * coefficients[2] + d2 * coefficients[3])
+}
+reg3 <- function(d1, d2, d3, coefficients) {
+(coefficients[1] + d1 * coefficients[2] + d2 * coefficients[3] + d3 * coefficients[4])
+}
+reg4 <- function(d1, d2, d3, d4, coefficients) {
+(coefficients[1] + d1 * coefficients[2] + d2 * coefficients[3] + d3 * coefficients[4] + d4 * coefficients[5])
+}
+grapher <- function(dataset) {
+seq_data <- seq(-401, 400, 1)
+# preperation for the graphs
+par(mfrow=c(1,3), mar=c(3,4,4,2))
+norm_dist <- dnorm(seq_data, mean = mean(dataset), sd = sd(dataset))
+# density
+plot(density(dataset), xlab = "", ylab = "", main = "Density")
+lines(seq_data, norm_dist, col = "Red")
+# qqplot
+qqnorm(dataset, xlab = "", ylab = "", main = "QQ Plots")
+qqline(dataset, col = "Red")
+# histogram
+hist(dataset, breaks = 20, probability = T, xlab = "Frequency", ylab = "Probability", main = "Distribution Histogram")
+lines(seq_data, norm_dist, col = "red")
+# adding title to par graph
+title("Residual's Graphs", outer = T)
+}
+graphsMultipleForTest <- function(model) {
+# testing
+mpg_predict <- unname(predict(object = model, newdata = auto_test[,3:7]))
+mpg_residuals <- abs(mpg_predict - auto_test$mpg)
+grapher(mpg_residuals)
+}
+graphsSingleForTest <- function(dataset, model) {
+mpg_predict <- reg(dataset, model$coefficients)
+mpg_residuals <- abs(mpg_predict - auto_test$mpg)
+grapher(mpg_residuals)
+}
+panel.cor <- function(x, y){
+usr <- par("usr"); on.exit(par(usr))
+par(usr = c(0, 1, 0, 1))
+r <- round(cor(x, y), digits=2)
+txt <- paste0("R = ", r)
+cex.cor <- 0.8/strwidth(txt)
+text(0.5, 0.5, txt, cex = cex.cor * r)
+}
+# importing data & cleaning ---------------------------------------------------------
+auto <- read.csv("https://archive.ics.uci.edu/ml/machine-learning-databases/auto-mpg/auto-mpg.data", sep = "", header = F)
+colnames(auto) <- c("mpg", "cylinders", "displacement", "horsepower", "weight", "acceleration", "model year", "origin", "car name")
+# investigating the structure of data
+str(auto)
+# reformatting continuous variables
+auto$horsepower <- as.numeric(auto$horsepower)s
+# creating train and test data
+auto_train <- auto[1:300, ]
+auto_test <- auto[301:398, ]
+#dealing with outliers
+boxplot(auto_train[, c(3:6)], log = "y", las = 2, boxwex = 0.3)
+x <- auto_train$acceleration
+qnt <-quantile(x, probs=c(.25, .75))
+caps <- quantile(x, probs=c(.05, .95))
+h <- 1.5 * IQR(x)
+x[x < (qnt[1] - h)] <- caps[1]
+x[x > (qnt[2] + h)] <- caps[2]
+auto_train$acceleration <- x
+# univariate linear regression ------------------------------------------------------
+# plotting all
+pairs(~ mpg + displacement + horsepower + weight + acceleration, data = auto_train, lower.panel = panel.cor)
+corrplot(cor = cor(auto_train[,c(1,3:7)]), method = "number")
+# plotting individually
+auto_train.mpg.dp <- subset(auto_train, select = c("mpg", "displacement"))
+plot(auto_train.mpg.dp)
+auto_train.mpg.hp <- subset(auto_train, select = c("mpg", "horsepower"))
+plot(auto_train.mpg.hp)
+auto_train.mpg.we <- subset(auto_train, select = c("mpg", "weight"))
+plot(auto_train.mpg.we)
+auto_train.mpg.ac <- subset(auto_train, select = c("mpg", "acceleration"))
+plot(auto_train.mpg.ac)
+# training - displacement
+auto_model_dp <- lm(formula =  mpg ~ displacement, data = auto_train)
+# training - horsepower
+auto_model_hp <- lm(formula =  mpg ~ horsepower, data = auto_train)
+# training - weight
+auto_model_we <- lm(formula =  mpg ~ weight, data = auto_train)
+# training - acceleration
+auto_model_ac <- lm(formula =  mpg ~ acceleration, data = auto_train)
+# testing - displacement
+graphsSingleForTest(auto_test$displacement, auto_model_dp)
+# testing - horsepower
+graphsSingleForTest(auto_test$horsepower, auto_model_hp)
+# testing - weight
+graphsSingleForTest(auto_test$weight, auto_model_we)
+# testing - acceleration
+graphsSingleForTest(auto_test$acceleration, auto_model_ac)
+# multivariate linear regression ----------------------------------------------------
+# all =========================================
+# training  - displacement + horsepower + weight + acceleration
+auto_model_dp_hp_we_ac <- lm(formula =  mpg ~ displacement + horsepower + weight + acceleration, data = auto_train)
+# trivariate ==================================
+# training  -  horsepower + weight + acceleration
+auto_model_hp_we_ac <- lm(formula =  mpg ~ horsepower + weight + acceleration, data = auto_train)
+# training  - displacement + weight + acceleration
+auto_model_dp_we_ac <- lm(formula =  mpg ~ displacement + weight + acceleration, data = auto_train)
+# training  - displacement + horsepower + acceleration
+auto_model_dp_hp_ac <- lm(formula =  mpg ~ displacement + horsepower + acceleration, data = auto_train)
+# training  - displacement + horsepower + weight
+auto_model_dp_hp_we <- lm(formula =  mpg ~ displacement + horsepower + weight, data = auto_train)
+# bivariate ===================================
+# training  - displacement + horsepower
+auto_model_dp_hp <- lm(formula =  mpg ~ displacement + horsepower, data = auto_train)
+# training  - displacement + weight
+auto_model_dp_we <- lm(formula =  mpg ~ displacement + weight, data = auto_train)
+# training  - displacement + acceleration
+auto_model_dp_ac <- lm(formula =  mpg ~ displacement + acceleration, data = auto_train)
+# training  - horsepower + weight
+auto_model_hp_we <- lm(formula =  mpg ~ horsepower + weight, data = auto_train)
+# training  -  horsepower + acceleration
+auto_model_hp_ac <- lm(formula =  mpg ~ horsepower + acceleration, data = auto_train)
+# training  - weight + acceleration
+auto_model_we_ac <- lm(formula =  mpg ~ weight + acceleration, data = auto_train)
+# multivariate ================================
+auto_model <- auto_model_dp_hp_we_ac
+# trivariate ==================================
+auto_model <- auto_model_hp_we_ac
+auto_model <- auto_model_dp_we_ac
+auto_model <- auto_model_dp_hp_ac
+auto_model <- auto_model_dp_hp_we
+# bivariate ===================================
+auto_model <- auto_model_dp_hp
+auto_model <- auto_model_dp_we
+auto_model <- auto_model_dp_ac
+auto_model <- auto_model_hp_we
+auto_model <- auto_model_hp_ac
+auto_model <- auto_model_we_ac
+grapher(auto_model$residuals)
+graphsMultipleForTest(auto_model)
+auto_model <- list(model.1  = auto_model_ac,
+model.2  = auto_model_dp,
+model.3  = auto_model_hp,
+model.4  = auto_model_we,
+model.5  = auto_model_dp_hp,
+model.6  = auto_model_dp_we,
+model.7  = auto_model_dp_ac,
+model.8  = auto_model_hp_we,
+model.9  = auto_model_hp_ac,
+model.10 = auto_model_we_ac,
+model.11 = auto_model_dp_hp_we,
+model.12 = auto_model_dp_hp_ac,
+model.13 = auto_model_dp_we_ac,
+model.14 = auto_model_hp_we_ac,
+model.15 = auto_model_dp_hp_we_ac)
+sapply(auto_model, summary)
+sapply(auto_model, plot)
+boxplot(auto_train$acceleration)
+car::outlierTest(model = auto_model_we_ac)
+car::outlierTest(model = auto_model_dp_hp_ac)
+Heart <- read.csv("C:/Users/Rahul/Downloads/Heart.csv")
+View(Heart)
+names(heart)
+View(Heart)
+names(heart)
+View(Heart)
+view(heart)
+Heart <- read.csv("C:/Users/Rahul/Downloads/Heart.csv")
+View(Heart)
+names(Heart)
+unique(Heart$chestpain)
+unique(Heart$Chestpain)
+min(Heart$RestBP)
+min(heart$Age)
+min(Heart$Age)
+unique(Heart$ChestPain)
+hist(Heart$Age)
+hist(Heart$RestBP)
+hist(Heart$Chol)
+hist(Heart$MaxHR)
+hist(Heart$01dpeak)
+hist(Heart$0ldpeak)
+hist(Heart$oldpeak)
+hist(Heart$Oldpeak)
+library("e1071", lib.loc="~/R/win-library/3.4")
+install.packages("e1071")
+view(iris)
+View(iris)
+unique(iris$Species)
+svm_model <- svm(Species ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width,iris)
+svm_model <- svm(Species ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width,iris)
+library("e1071", lib.loc="~/R/win-library/3.4")
+svm_model <- svm(Species ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width,iris)
+svm_model$nclasses
+summary(svm_model)
+pred <- predict(svm_model,iris[,1:4])
+pred
+new_data <- cbind(iris,pred)
+View(new_data)
+detach("package:e1071", unload=TRUE)
+> Heart <- read.csv("C:/Users/Rahul/Downloads/Heart.csv")
+>   View(Heart)
+> names(Heart)
+Heart <- read.csv("C:/Users/Rahul/Downloads/Heart.csv")
+View(Heart)
+names(Heart)
+heart <- read.csv("C:/Users/Rahul/Downloads/Heart.csv")
+View(heart)
+names(heart)
+> min(Heart$RestBP)
+min(Heart$RestBP)
+Heart <- read.csv("C:/Users/Rahul/Desktop/pooja/510/project 2/Heart.csv")
+View(Heart)
+names(Heart)
+view(Heart)
