@@ -46,6 +46,24 @@ data_raw$Thal[is.na(data_raw$Thal)] = levels(data_raw$Thal)[2]
 # Ca has 4 missing values: replacing with most frequent level: 0
 data_raw$Ca[is.na(data_raw$Ca)] = levels(data_raw$Ca)[1]
 
+# normalization
+data_raw %>%
+  select(-one_of(c("X"))) %>%
+  select_if(is.numeric)  %>%
+  head
+# continuous variables
+cont_list = list(
+  Age = data_raw$Age,
+  RestBP = data_raw$RestBP,
+  Chol = data_raw$Chol,
+  MaxHR = data_raw$MaxHR,
+  Oldpeak = data_raw$Oldpeak
+)
+# examining and changing variables
+head(sapply(cont_list, scale))
+data_raw[, names(cont_list)] <- data.frame(sapply(cont_list, scale))
+head(data_raw)
+
 # for reproducable results, seed. TODO: we need to change this to kfold
 set.seed(1000)
 
