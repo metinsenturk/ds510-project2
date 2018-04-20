@@ -3,6 +3,8 @@
 "
   Methodology for doing lgm.
 "
+install.packages("ROCR")
+library(ROCR)
 
 # importing dataset
 data_raw = read.csv("./Dataset/Heart.csv")
@@ -20,9 +22,22 @@ data_raw$ExAng = as.factor(data_raw$ExAng)
 data_raw$Ca = as.factor(data_raw$Ca)
 data_raw$Slope = as.factor(data_raw$Slope)
 
+# examining factor levels
+sapply(list(data_raw$Sex, 
+            data_raw$Fbs, 
+            data_raw$RestECG, 
+            data_raw$Ca, 
+            data_raw$Slope,
+            data_raw$ChestPain,
+            data_raw$Thal), levels)
+
 # examining NA values
-summarise_if(data_raw, is.factor, funs(sum(is.na(.))))
+summarise_if(data_raw, is.atomic, funs(sum(is.na(.))))
 filter((data_raw), is.na(Ca) | is.na(Thal))
+# Thal has 2 missing values: replacing with most frequent level: normal
+data_raw$Thal[is.na(data_raw$Thal)] = levels(data_raw$Thal)[2]
+# Ca has 4 missing values: replacing with most frequent level: 0
+data_raw$Ca[is.na(data_raw$Ca)] = levels(data_raw$Ca)[1]
 
 # for reproducable results, seed. TODO: we need to change this to kfold
 set.seed(1000)
@@ -47,9 +62,6 @@ lapply(list(tab1,tab2,tab3,tab4,tab5,tab6,tab7,tab8), chisq.test)
 chisq.test(tab2)
 round(prop.table(tab2), 2)
 tab2
-
-# examining factor levels
-sapply(list(data_train$Sex, data_train$Fbs, data_train$RestECG, data_train$Ca, data_train$Slope), levels)
 
 # Models ====
 # logistic regression model
@@ -76,6 +88,10 @@ tab_tr_cm <- table(predicted = p_tr_preds, actual = data_train$AHD)
 tab_tr_cm
 mse <- 1 - sum(diag(tab_tr_cm))/sum(tab_tr_cm)
 mse
+tpr <- tab_tr_cm[1,2] / tab_tr_cm[2,2]
+tpr
+fpr <- tab_tr_cm[1,2] / tab_tr_cm[1,1]
+fpr
 
 # test results ====
 # the case of assuming all are healthy
@@ -94,3 +110,19 @@ tab_te_cm <- table(predicted = p_te_preds, actual = data_test$AHD)
 tab_te_cm
 mse <- 1 - sum(diag(tab_te_cm))/sum(tab_te_cm)
 mse
+tpr <- tab_te_cm[1,2] / tab_te_cm[2,2]
+tpr
+fpr <- tab_te_cm[1,2] / tab_te_cm[1,1]
+fpr
+
+# evaluation of model according to cutoff value ====
+probs <- predict(lgm_model, data_train, type = "response")
+head(probs)
+hist(probs)
+probs <- prediction(probs, data_train$AHD)
+evals <- performance(probs, "acc")
+plot(evals)
+true_positive_rate <- performance(probs, "tpr", "fpr")
+plot(true_positive_rate, col=rainbow(7), main="ROC curve Admissions", xlab="Specificity", 
+     ylab="Sensitivity")
+abline(0, 1)
