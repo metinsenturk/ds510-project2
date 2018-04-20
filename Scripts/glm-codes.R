@@ -21,7 +21,7 @@ data_raw$Ca = as.factor(data_raw$Ca)
 data_raw$Slope = as.factor(data_raw$Slope)
 
 # examining NA values
-summarise_if(data_raw, is.atomic, funs(sum(is.na(.))))
+summarise_if(data_raw, is.factor, funs(sum(is.na(.))))
 filter((data_raw), is.na(Ca) | is.na(Thal))
 
 # for reproducable results, seed. TODO: we need to change this to kfold
@@ -39,11 +39,13 @@ tab3 = ftable(xtabs(~ AHD + RestECG, data = data_train))
 tab4 = ftable(xtabs(~ AHD + ExAng, data = data_train))
 tab5 = ftable(xtabs(~ AHD + Ca, data = data_train))
 tab6 = ftable(xtabs(~ AHD + Slope, data = data_train))
+tab7 = ftable(xtabs(~ AHD + ChestPain, data = data_train))
+tab8 = ftable(xtabs(~ AHD + Thal, data = data_train))
 
 # running chisq test to understand correlation btw pairs. The smaller the better in terms of relationship. tab2 found to be high in p.
-lapply(list(tab1,tab2,tab3,tab4,tab5,tab6), chisq.test)
-round(prop.table(tab2), 2)
+lapply(list(tab1,tab2,tab3,tab4,tab5,tab6,tab7,tab8), chisq.test)
 chisq.test(tab2)
+round(prop.table(tab2), 2)
 tab2
 
 # examining factor levels
@@ -54,7 +56,15 @@ sapply(list(data_train$Sex, data_train$Fbs, data_train$RestECG, data_train$Ca, d
 lgm_model = glm(AHD ~ ., data = data_train, family = binomial)
 summary(lgm_model)
 
+# goodness-of-fit test
+with(lgm_model, pchisq(null.deviance - deviance, df.null - df.residual, lower.tail = F))
+
 # train results ====
+# the case of assuming all are healthy
+tab <- table(data_train$AHD)
+tab
+unname(round(tab[2] / sum(tab), 4))
+
 # prediction
 p_tr_probs = predict(lgm_model, data_train, type = "response")
 head(p_tr_probs)
@@ -68,6 +78,11 @@ mse <- 1 - sum(diag(tab_tr_cm))/sum(tab_tr_cm)
 mse
 
 # test results ====
+# the case of assuming all are healthy
+tab <- table(data_test$AHD)
+tab
+unname(round(tab[2] / sum(tab), 4))
+
 # prediction
 p_te_probs = predict(lgm_model, data_test, type = "response")
 head(p_te_probs)
