@@ -165,7 +165,7 @@ area_under_curve <-performance(probs, "auc")
 area_under_curve@y.values[[1]]
 
 # plots about the data ====
-par(mfrow = c(2,3))
+# cont type variables in train dataset
 plot_list = list(
   Age = data_train$Age,
   RestBP = data_train$RestBP,
@@ -174,8 +174,23 @@ plot_list = list(
   Oldpeak = data_train$Oldpeak
 )
 
+# plotting individually
+par(mfrow = c(2,3))
 sapply(plot_list, plot, y=data_train$AHD)
+
+# adding model line to plot TODO: needs debug
+plot_data <- plot_list[1]$Age
+head(plot_data)
+xv <- seq(min(plot_data), max(plot_data), 0.01)
+yv <- predict(lgm_model, data_train, type = "response")
+plot(plot_data, data_train$AHD)
+lines(plot_data ~ yv)
+
+# all cont type variables
 pairs(AHD ~ Age + RestBP + Chol + MaxHR + Oldpeak, 
       data = data_train,
       diag.panel = panel.hist,
       lower.panel = panel.cor) 
+
+
+
