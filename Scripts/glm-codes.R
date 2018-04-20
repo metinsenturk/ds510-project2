@@ -3,10 +3,15 @@
 "
   Methodology for doing lgm.
 "
+
+# required pckgs and fnctns ====
 install.packages("dplyr")
 install.packages("ROCR")
+
 library(ROCR)
 library(dplyr)
+
+source("Scripts/utility_functions.R")
 
 # importing dataset
 data_raw = read.csv("./Dataset/Heart.csv")
@@ -69,6 +74,9 @@ tab2
 # logistic regression model
 lgm_model = glm(AHD ~ ., data = data_train, family = binomial)
 summary(lgm_model)
+
+#odds ratio
+coef(lgm_model)
 
 # goodness-of-fit test
 with(lgm_model, pchisq(null.deviance - deviance, df.null - df.residual, lower.tail = F))
@@ -137,3 +145,19 @@ abline(0, 1)
 # area under the curve value
 area_under_curve <-performance(probs, "auc")
 area_under_curve@y.values[[1]]
+
+# plots about the data ====
+par(mfrow = c(2,3))
+plot_list = list(
+  Age = data_train$Age,
+  RestBP = data_train$RestBP,
+  Chol = data_train$Chol,
+  MaxHR = data_train$MaxHR,
+  Oldpeak = data_train$Oldpeak
+)
+
+sapply(plot_list, plot, y=data_train$AHD)
+pairs(AHD ~ Age + RestBP + Chol + MaxHR + Oldpeak, 
+      data = data_train,
+      diag.panel = panel.hist,
+      lower.panel = panel.cor) 
