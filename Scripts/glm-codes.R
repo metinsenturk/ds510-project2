@@ -3,8 +3,10 @@
 "
   Methodology for doing lgm.
 "
+install.packages("dplyr")
 install.packages("ROCR")
 library(ROCR)
+library(dplyr)
 
 # importing dataset
 data_raw = read.csv("./Dataset/Heart.csv")
@@ -116,13 +118,22 @@ fpr <- tab_te_cm[1,2] / tab_te_cm[1,1]
 fpr
 
 # evaluation of model according to cutoff value ====
+# probabilities frequency distribution
 probs <- predict(lgm_model, data_train, type = "response")
 head(probs)
 hist(probs)
+
+# accuracy acc to cutoff value
 probs <- prediction(probs, data_train$AHD)
 evals <- performance(probs, "acc")
 plot(evals)
+
+# true positive and false positive graph
 true_positive_rate <- performance(probs, "tpr", "fpr")
 plot(true_positive_rate, col=rainbow(7), main="ROC curve Admissions", xlab="Specificity", 
      ylab="Sensitivity")
 abline(0, 1)
+
+# area under the curve value
+area_under_curve <-performance(probs, "auc")
+area_under_curve@y.values[[1]]
