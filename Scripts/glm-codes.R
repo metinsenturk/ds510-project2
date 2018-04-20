@@ -7,9 +7,15 @@
 # required pckgs and fnctns ====
 install.packages("dplyr")
 install.packages("ROCR")
+install.packages("popbio")
+install.packages("aod")
+install.packages("caret")
 
 library(ROCR)
 library(dplyr)
+library(popbio)
+library(aod)
+library(caret)
 
 source("Scripts/utility_functions.R")
 
@@ -21,6 +27,9 @@ head(data_raw)
 # examining variables
 str(data_raw)
 
+# assigning 0 and 1 to predictor
+data_raw$AHD = ifelse(data_raw$AHD == "Yes", 1, 0)
+
 # variables needs to be converted to factor <- Sex, Fbs, RestECG, ExAng, Ca, Slope
 data_raw$Sex = as.factor(data_raw$Sex)
 data_raw$Fbs = as.factor(data_raw$Fbs)
@@ -30,6 +39,7 @@ data_raw$Ca = as.factor(data_raw$Ca)
 data_raw$Slope = as.factor(data_raw$Slope)
 
 # examining factor levels
+sapply(data_raw, function(x) {length(unique(x))})
 sapply(list(data_raw$Sex, 
             data_raw$Fbs, 
             data_raw$RestECG, 
@@ -72,6 +82,15 @@ ind = sample(x = 2, size = nrow(data_raw), replace = T, prob = c(0.9, 0.1))
 data_train = data_raw[ind == 1, ]
 data_test = data_raw[ind == 2, ]
 
+# variable analysis ====
+#some ratios
+#overall healthy rate
+sum(data_raw$AHD[data_raw$AHD == 1]) / length(data_raw$AHD)
+
+# correlation of cont variables
+cor(data.frame(cont_list))
+cor(data_raw$AHD, data.frame(cont_list))
+
 # frequency tables of AHD and factorial variables
 tab1 = ftable(xtabs(~ AHD + Sex, data = data_train)) 
 tab2 = ftable(xtabs(~ AHD + Fbs, data = data_train))
@@ -93,8 +112,13 @@ tab2
 lgm_model = glm(AHD ~ ., data = data_train, family = binomial)
 summary(lgm_model)
 
-#odds ratio
+# odds ratio
 coef(lgm_model)
+exp(coef(lgm_model))
+exp(confint(lgm_model))
+
+# wald test
+wald.test(b = coef(lgm_model), Sigma = vcov(lgm_model), Terms = 1:17)
 
 # goodness-of-fit test
 with(lgm_model, pchisq(null.deviance - deviance, df.null - df.residual, lower.tail = F))
@@ -182,9 +206,12 @@ sapply(plot_list, plot, y=data_train$AHD)
 plot_data <- plot_list[1]$Age
 head(plot_data)
 xv <- seq(min(plot_data), max(plot_data), 0.01)
-yv <- predict(lgm_model, data_train, type = "response")
+yv <- predict(lgm_model, list(plot_data=xv), type = "response")
 plot(plot_data, data_train$AHD)
 lines(plot_data ~ yv)
+
+#another graph
+logi.hist.plot(plot_data, data_train$AHD, boxp = F, type = "count", col = "gray", xlabel = "Age")
 
 # all cont type variables
 pairs(AHD ~ Age + RestBP + Chol + MaxHR + Oldpeak, 
