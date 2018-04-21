@@ -10,14 +10,20 @@ install.packages("ROCR")
 install.packages("popbio")
 install.packages("aod")
 install.packages("caret")
+install.packages("leaps")
+install.packages("bestglm")
 
+library(MASS)
 library(ROCR)
 library(dplyr)
 library(popbio)
 library(aod)
 library(caret)
+library(leaps)
+library(bestglm)
 
 source("Scripts/utility_functions.R")
+source("Scripts/glm_functions.R")
 
 # importing dataset
 data_raw = read.csv("./Dataset/Heart.csv")
@@ -101,7 +107,8 @@ tab6 = ftable(xtabs(~ AHD + Slope, data = data_train))
 tab7 = ftable(xtabs(~ AHD + ChestPain, data = data_train))
 tab8 = ftable(xtabs(~ AHD + Thal, data = data_train))
 
-# running chisq test to understand correlation btw pairs. The smaller the better in terms of relationship. tab2 found to be high in p.
+# running chisq test to understand correlation btw pairs. The smaller the better in terms of relationship. tab2 
+# found to be high in p.
 lapply(list(tab1,tab2,tab3,tab4,tab5,tab6,tab7,tab8), chisq.test)
 chisq.test(tab2)
 round(prop.table(tab2), 2)
@@ -109,7 +116,10 @@ tab2
 
 # Models ====
 # logistic regression model
-lgm_model = glm(AHD ~ ., data = data_train, family = binomial)
+f.all <- AHD ~ Age + RestBP + Chol + MaxHR + Oldpeak
+f.1 <- AHD ~ MaxHR + Oldpeak + RestBP + Chol
+f.2 <- AHD ~ RestBP + Chol
+lgm_model = glm(f.1, data = data_train, family = binomial)
 summary(lgm_model)
 
 # odds ratio
@@ -117,55 +127,49 @@ coef(lgm_model)
 exp(coef(lgm_model))
 exp(confint(lgm_model))
 
+# Anova
+anova(lgm_model)
+
+# stepAIC
+steps <- stepAIC(lgm_model, trace = F)
+summary(steps)
+
+steps <- step(lgm_model)
+summary(steps)
+# leaps
+regsubs <- regsubsets(AHD ~ . -X, 
+           data = data_train,
+           nbest = 1,
+           method = "exhaustive")
+summary(regsubs)
+
+# bestglm
+plot_list$AHD <- data_train$AHD
+
+best_glm <- bestglm(data.frame(plot_list),
+                    family = binomial,
+                    IC = "AIC")
+best_glm$BestModels
+
 # wald test
-wald.test(b = coef(lgm_model), Sigma = vcov(lgm_model), Terms = 1:17)
+wald.test(b = coef(lgm_model), Sigma = vcov(lgm_model), Terms = 2:4)
 
 # goodness-of-fit test
 with(lgm_model, pchisq(null.deviance - deviance, df.null - df.residual, lower.tail = F))
-
-# train results ====
-# the case of assuming all are healthy
-tab <- table(data_train$AHD)
-tab
-unname(round(tab[2] / sum(tab), 4))
 
 # prediction
 p_tr_probs = predict(lgm_model, data_train, type = "response")
 head(p_tr_probs)
 head(data_train)
+cfi <- confmatrix(p_tr_probs, data_train$AHD)
+cfi$mtrx
+cfi$info
 
-# misclassification error and confusion matrix
-p_tr_preds <- ifelse(p_tr_probs > 0.5, 1, 0)
-tab_tr_cm <- table(predicted = p_tr_preds, actual = data_train$AHD)
-tab_tr_cm
-mse <- 1 - sum(diag(tab_tr_cm))/sum(tab_tr_cm)
-mse
-tpr <- tab_tr_cm[1,2] / tab_tr_cm[2,2]
-tpr
-fpr <- tab_tr_cm[1,2] / tab_tr_cm[1,1]
-fpr
-
-# test results ====
-# the case of assuming all are healthy
-tab <- table(data_test$AHD)
-tab
-unname(round(tab[2] / sum(tab), 4))
-
-# prediction
 p_te_probs = predict(lgm_model, data_test, type = "response")
 head(p_te_probs)
 head(data_train)
-
-# misclassification error and confusion matrix
-p_te_preds <- ifelse(p_te_probs > 0.5, 1, 0)
-tab_te_cm <- table(predicted = p_te_preds, actual = data_test$AHD)
-tab_te_cm
-mse <- 1 - sum(diag(tab_te_cm))/sum(tab_te_cm)
-mse
-tpr <- tab_te_cm[1,2] / tab_te_cm[2,2]
-tpr
-fpr <- tab_te_cm[1,2] / tab_te_cm[1,1]
-fpr
+cfi <- confmatrix(p_te_probs, data_test$AHD)
+cfi$info
 
 # evaluation of model according to cutoff value ====
 # probabilities frequency distribution
@@ -205,10 +209,10 @@ sapply(plot_list, plot, y=data_train$AHD)
 # adding model line to plot TODO: needs debug
 plot_data <- plot_list[1]$Age
 head(plot_data)
-xv <- seq(min(plot_data), max(plot_data), 0.01)
-yv <- predict(lgm_model, list(plot_data=xv), type = "response")
+xv <- data.frame(Age = seq(min(plot_data), max(plot_data), by = 0.01))
+yv <- predict(lgm_model, data_train = xv, type = "response")
 plot(plot_data, data_train$AHD)
-lines(plot_data ~ yv)
+curve(predict(lgm_model, data.frame(Age=x), type = "response"), add = T)
 
 #another graph
 logi.hist.plot(plot_data, data_train$AHD, boxp = F, type = "count", col = "gray", xlabel = "Age")
