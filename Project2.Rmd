@@ -1,0 +1,25 @@
+---
+title: "Examining Heart Disease"
+output: 
+  html_document:
+    toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r pressure, echo=FALSE}
+# Required libraries
+```
+
+## Executive Summary
+## Technical Analysis
+### Introduction
+### Data Analysis
+### Variables' Analysis
+### Models
+#### Logistic Regression Approach
+#### Support Vector Machine (SVM) Approach
+### Conclusion
+

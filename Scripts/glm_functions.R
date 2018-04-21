@@ -19,10 +19,10 @@ source("Scripts/utility_functions.R")
 confmatrix <- function(probs, actual) {
   # rounding decimal point
   rd <- 4
+  
   # confusion matrix
   preds <- ifelse(probs > 0.5, 1, 0)
   tab1 <- table(predicted = preds, actual = actual)
-  tab1
   
   # misclassification error
   mse <- round(1 - sum(diag(tab1))/sum(tab1), rd)
@@ -31,7 +31,6 @@ confmatrix <- function(probs, actual) {
   
   # dummy guess ratio for actual data
   tab <- table(actual)
-  tab
   all_true <- unname(round(tab[2] / sum(tab), rd))
   all_fals <- unname(round(tab[1] / sum(tab), rd))
   

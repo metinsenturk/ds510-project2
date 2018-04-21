@@ -12,6 +12,7 @@ install.packages("aod")
 install.packages("caret")
 install.packages("leaps")
 install.packages("bestglm")
+install.packages("boot")
 
 library(MASS)
 library(ROCR)
@@ -21,6 +22,7 @@ library(aod)
 library(caret)
 library(leaps)
 library(bestglm)
+library(boot)
 
 source("Scripts/utility_functions.R")
 source("Scripts/glm_functions.R")
@@ -84,14 +86,14 @@ head(data_raw)
 set.seed(1000)
 
 # creating dataset for train and test
-ind = sample(x = 2, size = nrow(data_raw), replace = T, prob = c(0.9, 0.1))
+ind = sample(x = 2, size = nrow(data_raw), replace = T, prob = c(0.75, 0.2))
 data_train = data_raw[ind == 1, ]
 data_test = data_raw[ind == 2, ]
 
 # variable analysis ====
 #some ratios
 #overall healthy rate
-sum(data_raw$AHD[data_raw$AHD == 1]) / length(data_raw$AHD)
+sum(data_train$AHD[data_train$AHD == 1]) / length(data_train$AHD)
 
 # correlation of cont variables
 cor(data.frame(cont_list))
@@ -117,30 +119,34 @@ tab2
 # Models ====
 # logistic regression model
 f.all <- AHD ~ Age + RestBP + Chol + MaxHR + Oldpeak
-f.1 <- AHD ~ MaxHR + Oldpeak + RestBP + Chol
+f.1 <- AHD ~ MaxHR + Oldpeak + Chol
 f.2 <- AHD ~ RestBP + Chol
-lgm_model = glm(f.1, data = data_train, family = binomial)
+lgm_model = glm(AHD ~ . -X, data = data_train, family = binomial)
 summary(lgm_model)
 
 # odds ratio
-coef(lgm_model)
-exp(coef(lgm_model))
-exp(confint(lgm_model))
+cbind(exp(confint(lgm_model)), Ods_Ratio = exp(coef(lgm_model)), Coef = coef(lgm_model))
 
 # Anova
 anova(lgm_model)
 
+s <- lapply(list(f.all,f.1,f.2), glm, data = data_train, family = binomial)
+s
+anova(s[1][1], s[2], s[3])
+
 # stepAIC
-steps <- stepAIC(lgm_model, trace = F)
+steps <- stepAIC(lgm_model, trace = T)
+steps
 summary(steps)
 
 steps <- step(lgm_model)
 summary(steps)
 # leaps
-regsubs <- regsubsets(AHD ~ . -X, 
+regsubs <- regsubsets(AHD ~ Age + RestBP + Chol + MaxHR + Oldpeak, 
            data = data_train,
            nbest = 1,
            method = "exhaustive")
+regsubs
 summary(regsubs)
 
 # bestglm
@@ -157,19 +163,20 @@ wald.test(b = coef(lgm_model), Sigma = vcov(lgm_model), Terms = 2:4)
 # goodness-of-fit test
 with(lgm_model, pchisq(null.deviance - deviance, df.null - df.residual, lower.tail = F))
 
-# prediction
+# conf matrix test
 p_tr_probs = predict(lgm_model, data_train, type = "response")
 head(p_tr_probs)
 head(data_train)
-cfi <- confmatrix(p_tr_probs, data_train$AHD)
-cfi$mtrx
-cfi$info
+cfi_tr <- confmatrix(p_tr_probs, data_train$AHD)
+cfi_tr$mtrx
+cfi_tr$info
 
 p_te_probs = predict(lgm_model, data_test, type = "response")
 head(p_te_probs)
 head(data_train)
-cfi <- confmatrix(p_te_probs, data_test$AHD)
-cfi$info
+cfi_te <- confmatrix(p_te_probs, data_test$AHD)
+cfi_te$mtrx
+cfi_te$info
 
 # evaluation of model according to cutoff value ====
 # probabilities frequency distribution
@@ -223,5 +230,12 @@ pairs(AHD ~ Age + RestBP + Chol + MaxHR + Oldpeak,
       diag.panel = panel.hist,
       lower.panel = panel.cor) 
 
+#kfold
+trcontrol <- trainControl(method = "cv", number = 10)
+trcontrol
+train(f.all, data_train, method = 'glm', family = binomial, trcontrol = trcontrol)
 
-
+cv_model <- cv.glm(data_train, lgm_model)
+cv_model$delta
+cv_model <- cv.glm(data_train, lgm_model, K = 10)
+cv_model$delta
