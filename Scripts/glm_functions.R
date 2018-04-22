@@ -14,11 +14,12 @@ invisible(package.check(pkgs))
 
 # Functions ====
 
-confmatrix <- function(probs, actual) {
+confmatrix <- function(probs, actual, db) {
   # creates conf matrix and a set of results about confmatrix
   # args: 
   #   preds: output of predict function
   #   actual: predictor dataset
+  #   db: decision boundary value
   # returns:
   #   a list contains a conf matrix and a table of info.
   
@@ -26,7 +27,7 @@ confmatrix <- function(probs, actual) {
   rd <- 4
   
   # confusion matrix
-  preds <- ifelse(probs > 0.5, 1, 0)
+  preds <- ifelse(probs > db, 1, 0)
   tab1 <- table(predicted = preds, actual = actual)
   
   # misclassification error
@@ -70,7 +71,9 @@ rocplot <- function(preds, actual, ...){
   perf = performance(predt , "tpr", "fpr") 
   
   # plotting
-  par(mfrow = c(1,2))
+  par(mfrow = c(1,3))
+  hist(preds, prob = T, main="Predicted Probability Hist")
+  lines(density(preds), col = "Red")
   plot(eval, col=rainbow(4), main="Accuracy Curve")
   plot(perf, col=rainbow(7), main="ROC Curve Admissions", ...)
   abline(0, 1)

@@ -15,8 +15,8 @@ knitr::opts_chunk$set(echo = TRUE)
 source("Scripts/utility_functions.R")
 
 # packages
-pkgs <- c("dplyr")
-package.check(pkgs)
+pkgs <- c("dplyr", "popbio")
+invisible(package.check(pkgs))
 ```
 
 ```{txt echo=FALSE}
@@ -84,8 +84,10 @@ boxplot(data_raw[,c(2, 5, 6, 9, 11)],
 
 ```{r outlier removal}
 # outlier removals on detected variables
-data_raw$RestBP = outlier_handler(data_raw$RestBP)
 data_raw$Chol = outlier_handler(data_raw$Chol)
+
+data_raw$RestBP = outlier_handler(data_raw$RestBP)
+
 data_raw$Oldpeak = outlier_handler(data_raw$Oldpeak)
 ```
 
@@ -95,32 +97,88 @@ data_train = data_raw[ 1:250, ]
 data_test = data_raw[251:303, ]
 ```
 
-
 ### Variables' Analysis
-```{r}
-# 
+```{r correlation plotting}
+# correlation between predictor or variables
+pairs(AHD ~ Age + RestBP + Chol + MaxHR + Oldpeak, 
+      data = data_train,
+      diag.panel = panel.hist,
+      lower.panel = panel.cor) 
 ```
 
-```{r}
-# 
-```
+```{r dummy guessing}
+# assuming all having the disease
+t = table(rep(1, 250), data_train$AHD)
 
-```{r}
-# 
+# chances
+data.frame(all_diseased = t[1,2] / sum(t), 
+           none_diseased = t[1,1] / sum(t))
 ```
 
 ### Models
+```{r possible regression models}
+# model with all variables
+f_0 <- AHD ~ Age + RestBP + Chol + MaxHR + Oldpeak
+
+# other possible models
+f_1 <- AHD ~ MaxHR + Oldpeak + RestBP
+f_2 <- AHD ~ RestBP + Chol + MaxHR + Oldpeak
+```
+
 #### Logistic Regression Approach
-```{r}
-# 
+```{r glm }
+# f_1 <- AHD ~ MaxHR + Oldpeak + RestBP
+lgm_model = glm(f_1, data = data_train, family = binomial)
+summary(lgm_model)
 ```
 
-```{r}
-# 
+```{r model interperetation 1}
+# goodness-of-fit test
+with(lgm_model, 
+     pchisq(null.deviance - deviance, 
+            df.null - df.residual, 
+            lower.tail = F))
 ```
 
-```{r}
-# 
+```{r model plot}
+# plotting the model fit on the data
+probs <- predict(lgm_model, data_train, type = "response")
+logi.hist.plot(probs, 
+               data_train$AHD, 
+               boxp = F, 
+               type = "count", 
+               col = "gray", 
+               xlabel = "Age")
+```
+
+```{r cutoff plot, echo=FALSE}
+# plots for roc, accuracy and prob dist hist
+probs <- predict(lgm_model, data_train, type = "response")
+rocplot(probs, data_train$AHD)
+```
+
+```{r cutoff detection}
+# accuracy and cutoff value
+cutoff_acc(probs, data_train$AHD)
+```
+
+```{r confusion matrix for train}
+# decision boundary value from cutoff analysis
+db <- unname(cutoff_acc(probs, data_train$AHD)[2,1])
+
+# confusion matrix for train data
+probs = predict(lgm_model, data_train, type = "response")
+cfi_tr <- confmatrix(probs, data_train$AHD, db)
+cfi_tr$mtrx
+cfi_tr$info
+```
+
+```{r confusion matrix for test}
+# confusion matrix for test data
+probs = predict(lgm_model, data_test, type = "response")
+cfi_te <- confmatrix(probs, data_test$AHD, db)
+cfi_te$mtrx
+cfi_te$info
 ```
 
 #### Support Vector Machine (SVM) Approach

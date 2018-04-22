@@ -175,30 +175,32 @@ best_glm$BestModels
 wald.test(b = coef(lgm_model), Sigma = vcov(lgm_model), Terms = 2:4)
 
 # goodness-of-fit test
-with(lgm_model, pchisq(null.deviance - deviance, df.null - df.residual, lower.tail = F))
+with(lgm_model, 
+     pchisq(null.deviance - deviance, 
+            df.null - df.residual, 
+            lower.tail = F))
+
+# evaluation of model according to cutoff value ====
+probs <- predict(lgm_model, data_train, type = "response")
+rocplot(probs, data_train$AHD)
+cutoff_acc(probs, data_train$AHD)
+cutoff_roc(probs, data_train$AHD)
 
 # conf matrix test
+db <- unname(cutoff_acc(probs, data_train$AHD)[2,1])
 p_tr_probs = predict(lgm_model, data_train, type = "response")
 head(p_tr_probs)
 head(data_train)
-cfi_tr <- confmatrix(p_tr_probs, data_train$AHD)
+cfi_tr <- confmatrix(p_tr_probs, data_train$AHD, db)
 cfi_tr$mtrx
 cfi_tr$info
 
 p_te_probs = predict(lgm_model, data_test, type = "response")
 head(p_te_probs)
 head(data_train)
-cfi_te <- confmatrix(p_te_probs, data_test$AHD)
+cfi_te <- confmatrix(p_te_probs, data_test$AHD, db)
 cfi_te$mtrx
 cfi_te$info
-
-# evaluation of model according to cutoff value ====
-probs <- predict(lgm_model, data_train, type = "response")
-head(probs)
-hist(probs)
-rocplot(probs, data_train$AHD)
-cutoff_acc(probs, data_train$AHD)
-cutoff_roc(probs, data_train$AHD)
 
 # plots about the data ====
 # cont type variables in train dataset
@@ -216,7 +218,7 @@ sapply(plot_list, plot, y=data_train$AHD)
 par(mfrow = c(1,1))
 
 #another graph
-logi.hist.plot(plot_data, data_train$AHD, boxp = F, type = "count", col = "gray", xlabel = "Age")
+logi.hist.plot(probs, data_train$AHD, boxp = F, type = "count", col = "gray", xlabel = "Age")
 
 # all cont type variables
 pairs(AHD ~ Age + RestBP + Chol + MaxHR + Oldpeak, 
@@ -233,5 +235,5 @@ cv_model <- cv.glm(data_train, lgm_model)
 cv_model$delta
 cv_model <- cv.glm(data_train, lgm_model, K = 10)
 cv_model$delta
-flds <- createFolds(data_train, k = 200, list = TRUE, returnTrain = FALSE)
+flds <- createFolds(data_train, k = 10, list = TRUE, returnTrain = FALSE)
 flds
