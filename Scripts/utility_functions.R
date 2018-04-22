@@ -1,6 +1,15 @@
 '
   General Helper Functions
 '
+# General ====
+package.check <- function(packages){
+  lapply(packages, FUN = function(x) {
+    if (!require(x, character.only = T)) {
+      install.packages(x, dependencies = T)
+      library(x, character.only = T)
+    }
+  })
+}
 
 # Plot ====
 panel.cor <- function(x, y, digits = 2, prefix = "", cex.cor, ...)

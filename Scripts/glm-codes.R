@@ -5,8 +5,12 @@
 "
 
 # required pckgs and fnctns ====
+# local sources
+source("Scripts/utility_functions.R")
+source("Scripts/glm_functions.R")
+
+# packages
 install.packages("dplyr")
-install.packages("ROCR")
 install.packages("popbio")
 install.packages("aod")
 install.packages("caret")
@@ -15,7 +19,6 @@ install.packages("bestglm")
 install.packages("boot")
 
 library(MASS)
-library(ROCR)
 library(dplyr)
 library(popbio)
 library(aod)
@@ -24,8 +27,6 @@ library(leaps)
 library(bestglm)
 library(boot)
 
-source("Scripts/utility_functions.R")
-source("Scripts/glm_functions.R")
 
 # importing dataset
 data_raw = read.csv("./Dataset/Heart.csv")
@@ -64,17 +65,6 @@ data_raw$Thal[is.na(data_raw$Thal)] = levels(data_raw$Thal)[2]
 # Ca has 4 missing values: replacing with most frequent level: 0
 data_raw$Ca[is.na(data_raw$Ca)] = levels(data_raw$Ca)[1]
 
-#dealing with outliers
-boxplot(data_raw[, c(2,3,5,7)], log = "y", las = 2, boxwex = 0.3)
-
-x <- auto_train$acceleration
-qnt <-quantile(x, probs=c(.25, .75))
-caps <- quantile(x, probs=c(.05, .95))
-h <- 1.5 * IQR(x)
-x[x < (qnt[1] - h)] <- caps[1]
-x[x > (qnt[2] + h)] <- caps[2]
-auto_train$acceleration <- x
-
 # normalization
 data_raw %>%
   select(-one_of(c("X"))) %>%
@@ -93,13 +83,26 @@ head(sapply(cont_list, scale))
 data_raw[, names(cont_list)] <- data.frame(sapply(cont_list, scale))
 head(data_raw)
 
-# for reproducable results, seed. TODO: we need to change this to kfold
-set.seed(1000)
+#dealing with outliers
+boxplot(data_raw[,c(2, 5, 6, 9, 11)], 
+        log = "x", 
+        las = 2,
+        boxwex = 0.3)
+
+data_raw$RestBP = outlier_handler(data_raw$RestBP)
+data_raw$Chol = outlier_handler(data_raw$Chol)
+data_raw$Oldpeak = outlier_handler(data_raw$Oldpeak)
 
 # creating dataset for train and test
+# other way to split dataset
+set.seed(1000)
 ind = sample(x = 2, size = nrow(data_raw), replace = T, prob = c(0.75, 0.2))
 data_train = data_raw[ind == 1, ]
 data_test = data_raw[ind == 2, ]
+
+# train and test datasets
+data_train = data_raw[ 1:250, ]
+data_test = data_raw[251:303, ]
 
 # variable analysis ====
 #some ratios

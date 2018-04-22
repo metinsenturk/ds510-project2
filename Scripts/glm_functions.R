@@ -5,23 +5,23 @@
 '
 
 # Required Packages & Sources ====
-install.packages("dplyr")
-install.packages("ROCR")
-install.packages("popbio")
-install.packages("aod")
-install.packages("caret")
-
-library(ROCR)
-library(dplyr)
-library(popbio)
-library(aod)
-library(caret)
-
+# local functions
 source("Scripts/utility_functions.R")
+
+# packages
+pkgs = c("dplyr", "ROCR")
+invisible(package.check(pkgs))
 
 # Functions ====
 
 confmatrix <- function(probs, actual) {
+  # creates conf matrix and a set of results about confmatrix
+  # args: 
+  #   preds: output of predict function
+  #   actual: predictor dataset
+  # returns:
+  #   a list contains a conf matrix and a table of info.
+  
   # rounding decimal point
   rd <- 4
   
@@ -45,12 +45,22 @@ confmatrix <- function(probs, actual) {
 }
 
 roc_auc <- function(preds){
+  # create accuracy and roc plot 
+  # args: 
+  #   preds: output of predict function
+  
   # area under the curve value
   area_under_curve <-performance(preds, "auc")
   area_under_curve@y.values[[1]]
 }
 
 rocplot <- function(preds, actual, ...){
+  # create accuracy and roc plot 
+  # args: 
+  #   preds: output of predict function
+  #   actual: predictor dataset
+  # returns:
+  #   matrix of spec, spef
   predt = prediction(preds, actual)
   
   # accuracy acc to cutoff value
@@ -68,6 +78,12 @@ rocplot <- function(preds, actual, ...){
 }
 
 cutoff_acc <- function(preds, actual){
+  # cutoff values according to accuracy
+  # args: 
+  #   preds: output of predict function
+  #   actual: predictor dataset
+  # returns:
+  #   matrix of acc and cutoff value
   predt = prediction(preds, actual)
   
   many.acc.perf = performance(predt, measure = "acc")
@@ -81,17 +97,39 @@ cutoff_acc <- function(preds, actual){
 }
 
 cutoff_roc <- function(preds, actual){
+  # cutoff values according to roc
+  # args: 
+  #   preds: output of predict function
+  #   actual: predictor dataset
+  # returns:
+  #   matrix of acc and cutoff value
   predt = prediction(preds, actual)
   
   # tpr and fpr spec and spef values
   perf = performance(predt , "tpr", "fpr")
   
   # func to find indices
-  cut.ind = mapply(FUN=function(x, y, p){
+  cut.ind = mapply(function(x, y, p){
     d = (x - 0)^2 + (y-1)^2
     ind = which(d == min(d))
     c(sensitivity = y[[ind]], specificity = 1-x[[ind]], 
       cutoff = p[[ind]])
   }, perf@x.values, perf@y.values, predt@cutoffs)
   (cut.ind)
+}
+
+outlier_handler <- function(vctr){
+  # removes outliers from given vector
+  # args: 
+  #   vctr: the vector that has outliers
+  # returns:
+  #   same vector without outliers
+  
+  x <- vctr
+  qnt <-quantile(x, probs=c(.25, .75))
+  caps <- quantile(x, probs=c(.05, .95))
+  h <- 1.5 * IQR(x)
+  x[x < (qnt[1] - h)] <- caps[1]
+  x[x > (qnt[2] + h)] <- caps[2]
+  (vctr <- x)
 }

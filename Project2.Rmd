@@ -11,6 +11,12 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r pressure, echo=FALSE}
 # Required libraries
+# local sources
+source("Scripts/utility_functions.R")
+
+# packages
+pkgs <- c("dplyr")
+package.check(pkgs)
 ```
 
 ```{txt echo=FALSE}
@@ -29,10 +35,94 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Executive Summary
 ## Technical Analysis
 ### Introduction
+```{r dataset}
+# importing dataset
+data_raw = read.csv("./Dataset/Heart.csv")
+head(data_raw)
+```
+
 ### Data Analysis
+```{r data structure}
+# examining variables
+str(data_raw)
+```
+
+```{r na displaying}
+# examining NA values
+summarise_if(data_raw, is.atomic, funs(sum(is.na(.))))
+```
+
+```{r predictor naming}
+# assigning 0 and 1 to predictor
+data_raw$AHD = ifelse(data_raw$AHD == "Yes", 1, 0)
+```
+
+```{r normalization}
+# normalization
+cont_list = list(
+  Age = data_raw$Age,
+  RestBP = data_raw$RestBP,
+  Chol = data_raw$Chol,
+  MaxHR = data_raw$MaxHR,
+  Oldpeak = data_raw$Oldpeak
+)
+
+data_raw[, names(cont_list)] <- data.frame(sapply(cont_list, scale))
+data_raw %>%
+  select(-one_of(c("X"))) %>%
+  select_if(is.numeric)  %>%
+  head
+```
+
+```{r outlier plot, echo=FALSE}
+# outlier analysis and removal
+boxplot(data_raw[,c(2, 5, 6, 9, 11)], 
+        log = "x", 
+        las = 2,
+        boxwex = 0.3)
+```
+
+```{r outlier removal}
+# outlier removals on detected variables
+data_raw$RestBP = outlier_handler(data_raw$RestBP)
+data_raw$Chol = outlier_handler(data_raw$Chol)
+data_raw$Oldpeak = outlier_handler(data_raw$Oldpeak)
+```
+
+```{r splitting dataset}
+# train and test datasets
+data_train = data_raw[ 1:250, ]
+data_test = data_raw[251:303, ]
+```
+
+
 ### Variables' Analysis
+```{r}
+# 
+```
+
+```{r}
+# 
+```
+
+```{r}
+# 
+```
+
 ### Models
 #### Logistic Regression Approach
+```{r}
+# 
+```
+
+```{r}
+# 
+```
+
+```{r}
+# 
+```
+
 #### Support Vector Machine (SVM) Approach
 ### Conclusion
 
