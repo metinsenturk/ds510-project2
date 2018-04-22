@@ -64,6 +64,17 @@ data_raw$Thal[is.na(data_raw$Thal)] = levels(data_raw$Thal)[2]
 # Ca has 4 missing values: replacing with most frequent level: 0
 data_raw$Ca[is.na(data_raw$Ca)] = levels(data_raw$Ca)[1]
 
+#dealing with outliers
+boxplot(data_raw[, c(2,3,5,7)], log = "y", las = 2, boxwex = 0.3)
+
+x <- auto_train$acceleration
+qnt <-quantile(x, probs=c(.25, .75))
+caps <- quantile(x, probs=c(.05, .95))
+h <- 1.5 * IQR(x)
+x[x < (qnt[1] - h)] <- caps[1]
+x[x > (qnt[2] + h)] <- caps[2]
+auto_train$acceleration <- x
+
 # normalization
 data_raw %>%
   select(-one_of(c("X"))) %>%
@@ -118,10 +129,13 @@ tab2
 
 # Models ====
 # logistic regression model
-f.all <- AHD ~ Age + RestBP + Chol + MaxHR + Oldpeak
-f.1 <- AHD ~ MaxHR + Oldpeak + Chol
-f.2 <- AHD ~ RestBP + Chol
-lgm_model = glm(AHD ~ . -X, data = data_train, family = binomial)
+f_0 <- AHD ~ Age + RestBP + Chol + MaxHR + Oldpeak
+f_1 <- AHD ~ MaxHR + Oldpeak + RestBP
+f_2 <- AHD ~ RestBP + Chol + MaxHR + Oldpeak
+
+f_9 <- AHD ~ . -X
+
+lgm_model = glm(f_0, data = data_train, family = binomial)
 summary(lgm_model)
 
 # odds ratio
@@ -130,10 +144,6 @@ cbind(exp(confint(lgm_model)), Ods_Ratio = exp(coef(lgm_model)), Coef = coef(lgm
 # Anova
 anova(lgm_model)
 
-s <- lapply(list(f.all,f.1,f.2), glm, data = data_train, family = binomial)
-s
-anova(s[1][1], s[2], s[3])
-
 # stepAIC
 steps <- stepAIC(lgm_model, trace = T)
 steps
@@ -141,6 +151,7 @@ summary(steps)
 
 steps <- step(lgm_model)
 summary(steps)
+
 # leaps
 regsubs <- regsubsets(AHD ~ Age + RestBP + Chol + MaxHR + Oldpeak, 
            data = data_train,
@@ -193,6 +204,7 @@ plot(evals)
 true_positive_rate <- performance(probs, "tpr", "fpr")
 plot(true_positive_rate, col=rainbow(7), main="ROC curve Admissions", xlab="Specificity", 
      ylab="Sensitivity")
+lines(lgm_model$y)
 abline(0, 1)
 
 # area under the curve value
