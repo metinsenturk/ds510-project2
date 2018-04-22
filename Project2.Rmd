@@ -9,10 +9,10 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r pressure, echo=FALSE}
-# Required libraries
+```{r dependencies, include=FALSE}
 # local sources
 source("Scripts/utility_functions.R")
+source("Scripts/model_functions.R")
 
 # packages
 pkgs <- c("dplyr", "popbio")
@@ -74,7 +74,7 @@ data_raw %>%
   head
 ```
 
-```{r outlier plot, echo=FALSE}
+```{r outlier plot, echo=FALSE, fig.height=4, fig.width=6, fig.align="center", fig.cap="Outlier Detection with Boxplot"}
 # outlier analysis and removal
 boxplot(data_raw[,c(2, 5, 6, 9, 11)], 
         log = "x", 
@@ -140,7 +140,7 @@ with(lgm_model,
             lower.tail = F))
 ```
 
-```{r model plot}
+```{r model plot, echo=FALSE, fig.height=4, fig.width=6, fig.align="center", fig.cap="Model Fit in Data"}
 # plotting the model fit on the data
 probs <- predict(lgm_model, data_train, type = "response")
 logi.hist.plot(probs, 
@@ -148,10 +148,10 @@ logi.hist.plot(probs,
                boxp = F, 
                type = "count", 
                col = "gray", 
-               xlabel = "Age")
+               xlabel = "")
 ```
 
-```{r cutoff plot, echo=FALSE}
+```{r cutoff plot, echo=FALSE, fig.height=3, fig.width=9, fig.align="center", fig.cap="Cutoff Value Plots"}
 # plots for roc, accuracy and prob dist hist
 probs <- predict(lgm_model, data_train, type = "response")
 rocplot(probs, data_train$AHD)

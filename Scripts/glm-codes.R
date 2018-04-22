@@ -7,7 +7,7 @@
 # required pckgs and fnctns ====
 # local sources
 source("Scripts/utility_functions.R")
-source("Scripts/glm_functions.R")
+source("Scripts/model_functions.R")
 
 # packages
 install.packages("dplyr")
