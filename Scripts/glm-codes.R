@@ -190,26 +190,12 @@ cfi_te$mtrx
 cfi_te$info
 
 # evaluation of model according to cutoff value ====
-# probabilities frequency distribution
 probs <- predict(lgm_model, data_train, type = "response")
 head(probs)
 hist(probs)
-
-# accuracy acc to cutoff value
-probs <- prediction(probs, data_train$AHD)
-evals <- performance(probs, "acc")
-plot(evals)
-
-# true positive and false positive graph
-true_positive_rate <- performance(probs, "tpr", "fpr")
-plot(true_positive_rate, col=rainbow(7), main="ROC curve Admissions", xlab="Specificity", 
-     ylab="Sensitivity")
-lines(lgm_model$y)
-abline(0, 1)
-
-# area under the curve value
-area_under_curve <-performance(probs, "auc")
-area_under_curve@y.values[[1]]
+rocplot(probs, data_train$AHD)
+cutoff_acc(probs, data_train$AHD)
+cutoff_roc(probs, data_train$AHD)
 
 # plots about the data ====
 # cont type variables in train dataset
@@ -244,3 +230,5 @@ cv_model <- cv.glm(data_train, lgm_model)
 cv_model$delta
 cv_model <- cv.glm(data_train, lgm_model, K = 10)
 cv_model$delta
+flds <- createFolds(data_train, k = 200, list = TRUE, returnTrain = FALSE)
+flds
