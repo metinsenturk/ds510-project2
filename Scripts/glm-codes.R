@@ -212,14 +212,7 @@ plot_list = list(
 # plotting individually
 par(mfrow = c(2,3))
 sapply(plot_list, plot, y=data_train$AHD)
-
-# adding model line to plot TODO: needs debug
-plot_data <- plot_list[1]$Age
-head(plot_data)
-xv <- data.frame(Age = seq(min(plot_data), max(plot_data), by = 0.01))
-yv <- predict(lgm_model, data_train = xv, type = "response")
-plot(plot_data, data_train$AHD)
-curve(predict(lgm_model, data.frame(Age=x), type = "response"), add = T)
+par(mfrow = c(1,1))
 
 #another graph
 logi.hist.plot(plot_data, data_train$AHD, boxp = F, type = "count", col = "gray", xlabel = "Age")
