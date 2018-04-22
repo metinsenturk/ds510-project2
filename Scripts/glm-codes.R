@@ -46,6 +46,7 @@ data_raw$RestECG = as.factor(data_raw$RestECG)
 data_raw$ExAng = as.factor(data_raw$ExAng)
 data_raw$Ca = as.factor(data_raw$Ca)
 data_raw$Slope = as.factor(data_raw$Slope)
+data_raw$AHD = as.factor(data_raw$AHD)
 
 # examining factor levels
 sapply(data_raw, function(x) {length(unique(x))})
@@ -135,10 +136,11 @@ tab2
 f_0 <- AHD ~ Age + RestBP + Chol + MaxHR + Oldpeak
 f_1 <- AHD ~ MaxHR + Oldpeak + RestBP
 f_2 <- AHD ~ RestBP + Chol + MaxHR + Oldpeak
+f_3 <- AHD ~ Chol + MaxHR + Oldpeak
 
 f_9 <- AHD ~ . -X
 
-lgm_model = glm(f_0, data = data_train, family = binomial)
+lgm_model = glm(f_3, data = data_train, family = binomial)
 summary(lgm_model)
 
 # odds ratio
@@ -229,7 +231,7 @@ pairs(AHD ~ Age + RestBP + Chol + MaxHR + Oldpeak,
 #kfold
 trcontrol <- trainControl(method = "cv", number = 10)
 trcontrol
-train(f.all, data_train, method = 'glm', family = binomial, trcontrol = trcontrol)
+train(f_0, data_train, method = 'glm', family = binomial, trcontrol = trcontrol)
 
 cv_model <- cv.glm(data_train, lgm_model)
 cv_model$delta

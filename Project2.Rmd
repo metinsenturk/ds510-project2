@@ -54,7 +54,7 @@ summarise_if(data_raw, is.atomic, funs(sum(is.na(.))))
 
 ```{r predictor naming}
 # assigning 0 and 1 to predictor
-data_raw$AHD = ifelse(data_raw$AHD == "Yes", 1, 0)
+data_raw$AHD = as.factor(ifelse(data_raw$AHD == "Yes", 1, 0))
 ```
 
 ```{r normalization}
@@ -111,7 +111,7 @@ pairs(AHD ~ Age + RestBP + Chol + MaxHR + Oldpeak,
 t = table(rep(1, 250), data_train$AHD)
 
 # chances
-data.frame(all_diseased = t[1,2] / sum(t), 
+data.frame(all_diseased  = t[1,2] / sum(t), 
            none_diseased = t[1,1] / sum(t))
 ```
 
@@ -132,12 +132,12 @@ lgm_model = glm(f_1, data = data_train, family = binomial)
 summary(lgm_model)
 ```
 
-```{r model interperetation 1}
-# goodness-of-fit test
-with(lgm_model, 
-     pchisq(null.deviance - deviance, 
-            df.null - df.residual, 
-            lower.tail = F))
+```{r odds ratio}
+# odds of variables in the model
+ort <- cbind(exp(confint(lgm_model)), 
+             Coefficients = coef(lgm_model),
+             'Odds Ratio' = exp(coef(lgm_model))) 
+round(ort, 2)
 ```
 
 ```{r model plot, echo=FALSE, fig.height=4, fig.width=6, fig.align="center", fig.cap="Model Fit in Data"}
@@ -149,6 +149,14 @@ logi.hist.plot(probs,
                type = "count", 
                col = "gray", 
                xlabel = "")
+```
+
+```{r model interperetation 1}
+# goodness-of-fit test
+with(lgm_model, 
+     pchisq(null.deviance - deviance, 
+            df.null - df.residual, 
+            lower.tail = F))
 ```
 
 ```{r cutoff plot, echo=FALSE, fig.height=3, fig.width=9, fig.align="center", fig.cap="Cutoff Value Plots"}
