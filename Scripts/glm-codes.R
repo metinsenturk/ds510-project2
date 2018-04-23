@@ -229,13 +229,17 @@ pairs(AHD ~ Age + RestBP + Chol + MaxHR + Oldpeak,
       lower.panel = panel.cor) 
 
 #kfold
-trcontrol <- trainControl(method = "cv", number = 10)
-trcontrol
-train(f_0, data_train, method = 'glm', family = binomial, trcontrol = trcontrol)
+# https://www.r-bloggers.com/evaluating-logistic-regression-models/
+ctrl <- trainControl(method = "repeatedcv", number = 10, savePredictions = TRUE)
+mod_fit <- train(f_0, data=data_raw[ , c(2, 5, 6, 9, 11,15)], method="glm", family="binomial", trControl = ctrl, tuneLength = 5)
 
-cv_model <- cv.glm(data_train, lgm_model)
-cv_model$delta
-cv_model <- cv.glm(data_train, lgm_model, K = 10)
-cv_model$delta
-flds <- createFolds(data_train, k = 10, list = TRUE, returnTrain = FALSE)
-flds
+Train <- createDataPartition(data_raw$AHD, p=0.6, list=F)
+training <- data_raw[ Train, c(2, 5, 6, 9, 11,15)]
+testing <- data_raw[ -Train, c(2, 5, 6, 9, 11,15) ]
+mod_fit <- train(f_0, data=training, method="glm", family="binomial")
+
+summary(mod_fit)
+exp(coef(mod_fit$finalModel))
+pred <- predict(mod_fit, newdata=testing)
+confusionMatrix(data = pred, testing$AHD)
+
