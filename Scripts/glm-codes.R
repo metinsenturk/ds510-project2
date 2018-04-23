@@ -236,6 +236,7 @@ pairs(AHD ~ Age + RestBP + Chol + MaxHR + Oldpeak,
 
 #kfold
 # https://www.r-bloggers.com/evaluating-logistic-regression-models/
+<<<<<<< HEAD
 train_index <- createDataPartition(data_raw$AHD, p=0.8, list=F)
 training <- data_raw[ train_index, c(2, 5, 6, 9, 11,15)]
 testing <- data_raw[ -train_index, c(2, 5, 6, 9, 11,15)]
@@ -260,3 +261,18 @@ pred <- predict(mod_fit, newdata=testing)
 confusionMatrix(data = pred, testing$AHD)
 
 
+=======
+ctrl <- trainControl(method = "repeatedcv", number = 10, savePredictions = TRUE)
+mod_fit <- train(f_0, data=data_raw[ , c(2, 5, 6, 9, 11,15)], method="glm", family="binomial", trControl = ctrl, tuneLength = 5)
+
+Train <- createDataPartition(data_raw$AHD, p=0.6, list=F)
+training <- data_raw[ Train, c(2, 5, 6, 9, 11,15)]
+testing <- data_raw[ -Train, c(2, 5, 6, 9, 11,15) ]
+mod_fit <- train(f_0, data=training, method="glm", family="binomial")
+
+summary(mod_fit)
+exp(coef(mod_fit$finalModel))
+pred <- predict(mod_fit, newdata=testing)
+confusionMatrix(data = pred, testing$AHD)
+
+>>>>>>> 3420eb8600dae755286ac1805bb4937514c4b724
