@@ -19,19 +19,58 @@ vars = c("data_raw", "data_train", "data_test", "f_0")
 if (!exists(vars)) {
   stop("Variables in environment are missing.")
 } else {
-  head(data_raw)
-  f_0
+  str(data_train)
 }
 
-# variable analysis
-plot(data_train$Age, y = data_train$AHD)
+# datasets updated with only cont type variables
+data_train <- data_train[, c(2, 5, 6, 9, 11, 15)]
+data_test <- data_test[, c(2, 5, 6, 9, 11, 15)]
 
 # svm model ====
-svm_model <- svm(f_0, data = data_train, kernel = "radial", cost = 1, scale = F, type="C-classification") 
+# model
+svm_model <- svm(f_1, data = data_train, 
+                 kernel = "radial", 
+                 gamma = 1,
+                 cost = 0.5,
+                 decision.values=T,
+                 scale = F, 
+                 type = "C-classification") 
 summary(svm_model)
 
-plot(svm_model, data = data_train, AHD ~ Age)
+# tuning
+svm_tune <- tune(svm, f_1, data = data_train, 
+                 kernel = "radial", 
+                 type = "C-classification",
+                 decision.values=T,
+                 scale = F,
+                 ranges = list(gamma = 2^(-1:2), cost = 2^(-1:10)))
+svm_tune$best.parameters
+head(svm_tune$performances)
 
-preds <- predict(svm_model, data_train[,c(2, 5, 6, 9, 11)])
+svm_model <- svm_tune$best.model
+
+# plotting variables individually
+plot(data_train$Age, y = data_train$AHD, col = 2) 
+par(new=T)
+plot(data_train[,2], svm_model$fitted, col = 3)
+
+# roc
+preds <- predict(svm_model, data_train, decision.values = T)
+attrs <- attributes(preds)$decision.values
+rocplot(attrs, data_train$AHD)
+
+# conf matrix
+preds <- predict(svm_model, data_train)
+confmatrix(preds, data_train$AHD)
+
+# applying model to test data
+# roc for test
+preds <- predict(svm_model, data_test, decision.values = T)
+attrs <- attributes(preds)$decision.values
+rocplot(attrs, data_test$AHD)
+
+# conf matrix
+preds <- predict(svm_model, data_test)
+confmatrix(preds, data_test$AHD)
 
 

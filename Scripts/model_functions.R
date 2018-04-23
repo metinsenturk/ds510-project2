@@ -35,18 +35,22 @@ confmatrix <- function(probs, actual, db = NULL) {
   tab1 <- table(predicted = preds, actual = actual)
   
   # misclassification error
-  mse <- round(1 - sum(diag(tab1))/sum(tab1), rd)
-  tpr <- round(tab1[1,2] / tab1[2,2], rd)
-  fpr <- round(tab1[1,2] / tab1[1,1], rd)
+  mse <- 1 - sum(diag(tab1))/sum(tab1)
+  tpr <- tab1[1,2] / tab1[2,2]
+  fpr <- tab1[1,2] / tab1[1,1]
+  
+  # mean accuracy
+  acc <- mean(preds == actual)
   
   # dummy guess ratio for actual data
   tab <- table(actual)
-  all_true <- unname(round(tab[2] / sum(tab), rd))
-  all_fals <- unname(round(tab[1] / sum(tab), rd))
+  all_true <- unname(tab[2] / sum(tab))
+  all_fals <- unname(tab[1] / sum(tab))
   
   #printing
-  df <- data.frame(tpr = tpr, fpr = fpr, mse = mse, all_false = all_fals, all_true = all_true)
-  (list(mtrx = tab1, info = df))
+  df <- data.frame(tpr = tpr, fpr = fpr, mse = mse, accuracy = acc, if_all_false = all_fals, if_all_true = all_true)
+  re <- list(matrix = tab1, information = df)
+  sapply(re, round, rd)
 }
 
 roc_auc <- function(preds){
