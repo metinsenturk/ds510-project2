@@ -6,7 +6,8 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = T, tidy = T)
+knitr::knit_engines$set("txt")
 ```
 
 ```{r dependencies, include=FALSE}
@@ -15,7 +16,7 @@ source("Scripts/utility_functions.R")
 source("Scripts/model_functions.R")
 
 # packages
-pkgs <- c("dplyr", "popbio")
+pkgs <- c("dplyr", "popbio", "e1071")
 invisible(package.check(pkgs))
 ```
 
@@ -93,8 +94,8 @@ data_raw$Oldpeak = outlier_handler(data_raw$Oldpeak)
 
 ```{r splitting dataset}
 # train and test datasets
-data_train = data_raw[ 1:250, ]
-data_test = data_raw[251:303, ]
+data_train = data_raw[ 1:250, c(2, 5, 6, 9, 11, 15)]
+data_test = data_raw[251:303, c(2, 5, 6, 9, 11, 15)]
 ```
 
 ### Variables' Analysis
@@ -123,12 +124,13 @@ f_0 <- AHD ~ Age + RestBP + Chol + MaxHR + Oldpeak
 # other possible models
 f_1 <- AHD ~ MaxHR + Oldpeak + RestBP
 f_2 <- AHD ~ RestBP + Chol + MaxHR + Oldpeak
+f_3 <- AHD ~ Chol + MaxHR + Oldpeak
 ```
 
 #### Logistic Regression Approach
 ```{r glm }
 # f_1 <- AHD ~ MaxHR + Oldpeak + RestBP
-lgm_model = glm(f_1, data = data_train, family = binomial)
+lgm_model = glm(AHD ~ Chol + MaxHR + Oldpeak, data = data_train, family = binomial)
 summary(lgm_model)
 ```
 
@@ -188,5 +190,60 @@ confmatrix(probs, data_test$AHD, db)
 ```
 
 #### Support Vector Machine (SVM) Approach
+```{r finding best model with svm tune}
+# finding best model with svm tune
+if (!exists("svm_tune"))
+  svm_tune <- tune(svm, f_1, data = data_train, 
+                 type = "C-classification",
+                 kernel = "radial", 
+                 decision.values = T,
+                 scale = F,
+                 ranges = list(gamma = 2^(-1:2), cost = 2^(-1:10)))
+
+# first five performances
+head(svm_tune$performances)
+```
+
+```{r getting best model from tune}
+# getting the best model
+svm_model <- svm_tune$best.model
+
+# a brief summary of the best model
+summary(svm_model)
+```
+
+```{r confusion matrix on svm for train data}
+# confusion matrix for svm on train data
+preds <- predict(svm_model, data_train)
+confmatrix(preds, data_train$AHD)
+```
+
+```{r svm roc curve on train data, echo=FALSE, fig.height=3, fig.width=9, fig.align="center", fig.cap="SVM ROC for Train Data"}
+# roc curve graphs for svm on train data
+preds1 <- predict(svm_model, data_train, decision.values = T)
+attrs1 <- attributes(preds1)$decision.values
+
+rocplot(attrs1, data_train$AHD)
+```
+
+```{r confusion matrix on svm for test data}
+# confusion matrix for svm on test data
+preds <- predict(svm_model, data_test)
+confmatrix(preds, data_test$AHD)
+```
+
+```{r svm roc curve on test data, echo=FALSE, fig.height=3, fig.width=9, fig.align="center", fig.cap="SVM ROC for Test Data"}
+# roc curve graphs for svm on test data
+preds2 <- predict(svm_model, data_test, decision.values = T)
+attrs2 <- attributes(preds2)$decision.values
+
+rocplot(attrs2, data_test$AHD)
+```
+
+```{r comparing rocs, echo=FALSE, fig.height=3, fig.width=7, fig.align="center", fig.cap="Comparison between ROC Curves"}
+# comparing rocs
+rocplot_compare(attrs1, attrs2, data_train$AHD, data_test$AHD)
+```
+
 ### Conclusion
 

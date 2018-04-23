@@ -69,7 +69,7 @@ rocplot <- function(preds, actual, ...){
   #   preds: output of predict function
   #   actual: predictor dataset
   # returns:
-  #   matrix of spec, spef
+  #   three plots
   predt = prediction(preds, actual)
   
   # accuracy acc to cutoff value
@@ -84,6 +84,32 @@ rocplot <- function(preds, actual, ...){
   lines(density(preds), col = "Red")
   plot(eval, col=rainbow(4), main="Accuracy Curve")
   plot(perf, col=rainbow(7), main="ROC Curve Admissions", ...)
+  abline(0, 1)
+  par(mfrow = c(1,1))
+}
+
+rocplot_compare <- function(train_predictions, test_predictions, train_actual, test_actual, ...){
+  # compares roc plot btw train and test datasets
+  # args: 
+  #   preds: output of predict function
+  #   actual: predictor dataset
+  #   ... : graph paramaters
+  # returns:
+  #   two roc plots
+  
+  # train
+  predt_tr = prediction(train_predictions, train_actual)
+  perf_tr = performance(predt_tr, "tpr", "fpr")
+  
+  # train
+  predt_te = prediction(test_predictions, test_actual)
+  perf_te = performance(predt_te, "tpr", "fpr")
+  
+  #plotting
+  par(mfrow = c(1,2))
+  plot(perf_tr, col=rainbow(7), main="ROC - Train Data", ...)
+  abline(0, 1)
+  plot(perf_te, col=rainbow(7), main="ROC - Test Data", ...)
   abline(0, 1)
   par(mfrow = c(1,1))
 }
