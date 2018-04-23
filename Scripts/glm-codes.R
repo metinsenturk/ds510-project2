@@ -235,7 +235,6 @@ pairs(AHD ~ Age + RestBP + Chol + MaxHR + Oldpeak,
 
 #kfold
 # https://www.r-bloggers.com/evaluating-logistic-regression-models/
-<<<<<<< HEAD
 train_index <- createDataPartition(data_raw$AHD, p=0.8, list=F)
 training <- data_raw[ train_index, c(2, 5, 6, 9, 11,15)]
 testing <- data_raw[ -train_index, c(2, 5, 6, 9, 11,15)]

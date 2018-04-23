@@ -130,29 +130,34 @@ f_3 <- AHD ~ RestBP + Chol + MaxHR + Oldpeak
 
 #### Logistic Regression Approach
 ##### A Glance of All Variables
-```{r glm }
+```{r glm}
 # f_1 <- AHD ~ MaxHR + Oldpeak + RestBP
 lgm_model = glm(AHD ~ Age + RestBP + Chol + MaxHR + Oldpeak, data = data_train, family = binomial)
 summary(lgm_model)
 ```
 
-```{r}
+```{r variance importance evaluation}
 # variance importance of variables
 varImp(lgm_model)
 ```
 
-```{r}
+```{r anova for all variables}
 # analysis of variance of all variables
 anova(lgm_model)
 ```
 
-```{r}
+```{r comparison between models}
 # best 
 lgm_model_1 = glm(AHD ~ MaxHR + Oldpeak + RestBP, data = data_train, family = binomial)
 lgm_model_2 = glm(AHD ~ MaxHR + Oldpeak + Chol,   data = data_train, family = binomial)
 
 # Anova of two best models selected
 anova(lgm_model_1, lgm_model_2, test = "Chisq")
+```
+
+```{r selected model assigning, include=FALSE}
+# assigning the selected model
+lgm_model <- lgm_model_2
 ```
 
 ##### More Analysis on the Best Model
@@ -204,12 +209,46 @@ confmatrix(probs, data_train$AHD, db)
 
 ```
 
+```{r k-fold dataset}
+# creating training and test dataset
+train_index <- createDataPartition(data_raw$AHD, p=0.8, list=F)
+training <- data_raw[ train_index, c(2, 5, 6, 9, 11,15)]
+testing <- data_raw[ -train_index, c(2, 5, 6, 9, 11,15)]
+```
+
+```{r k-fold model}
+# k-fold control
+ctrl <- trainControl(method = "repeatedcv", 
+                     number = 10, repeats = 10, 
+                     savePredictions = TRUE)
+
+# k-fold training
+mod_fit <- train(AHD ~ MaxHR + Oldpeak + Chol, data=training, 
+                 method="glm", family="binomial",
+                 trControl = ctrl,
+                 tuneLength = 10)
+summary(mod_fit)
+mod_fit
+```
+
+```{r k-fold confusion matrix}
+# confusion matrix results for training data
+pred <- predict(mod_fit, newdata=training)
+confusionMatrix(data = pred, training$AHD)
+```
+
 ##### Model Validation 
 ```{r confusion matrix for test}
 # confusion matrix for test data
 probs = predict(lgm_model, data_test, type = "response")
 confmatrix(probs, data_test$AHD, db)
 
+```
+
+```{r confusion matrix for test with k-fold}
+# k-fold validation for test data
+pred <- predict(mod_fit, newdata=testing)
+confusionMatrix(data = pred, testing$AHD)
 ```
 
 #### Support Vector Machine (SVM) Approach
