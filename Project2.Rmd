@@ -3,6 +3,7 @@ title: "Examining Heart Disease"
 output: 
   html_document:
     toc: true
+    toc_depth: 6
 ---
 
 ```{r setup, include=FALSE}

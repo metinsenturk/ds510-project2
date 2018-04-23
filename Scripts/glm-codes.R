@@ -260,7 +260,6 @@ pred <- predict(mod_fit, newdata=testing)
 confusionMatrix(data = pred, testing$AHD)
 
 
-=======
 ctrl <- trainControl(method = "repeatedcv", number = 10, savePredictions = TRUE)
 mod_fit <- train(f_0, data=data_raw[ , c(2, 5, 6, 9, 11,15)], method="glm", family="binomial", trControl = ctrl, tuneLength = 5)
 
@@ -273,5 +272,3 @@ summary(mod_fit)
 exp(coef(mod_fit$finalModel))
 pred <- predict(mod_fit, newdata=testing)
 confusionMatrix(data = pred, testing$AHD)
-
->>>>>>> 3420eb8600dae755286ac1805bb4937514c4b724

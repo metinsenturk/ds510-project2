@@ -128,7 +128,14 @@ $(document).ready(function () {
 <li><a href="#introduction">Introduction</a></li>
 <li><a href="#data-analysis">Data Analysis</a></li>
 <li><a href="#variables-analysis">Variables’ Analysis</a></li>
-<li><a href="#models">Models</a></li>
+<li><a href="#models">Models</a><ul>
+<li><a href="#logistic-regression-approach">Logistic Regression Approach</a><ul>
+<li><a href="#a-glance-of-all-variables">A Glance of All Variables</a></li>
+<li><a href="#more-analysis-on-the-best-model">More Analysis on the Best Model</a></li>
+<li><a href="#model-validation">Model Validation</a></li>
+</ul></li>
+<li><a href="#support-vector-machine-svm-approach">Support Vector Machine (SVM) Approach</a></li>
+</ul></li>
 <li><a href="#conclusion">Conclusion</a></li>
 </ul></li>
 </ul>
@@ -415,12 +422,12 @@ if (!exists(&quot;svm_tune&quot;))
 # first five performances
 head(svm_tune$performances)</code></pre>
 <pre><code>##   gamma cost error dispersion
-## 1   0.5  0.5 0.304 0.07105553
-## 2   1.0  0.5 0.300 0.09475114
-## 3   2.0  0.5 0.400 0.04618802
-## 4   4.0  0.5 0.448 0.07254118
-## 5   0.5  1.0 0.288 0.08390471
-## 6   1.0  1.0 0.328 0.06196773</code></pre>
+## 1   0.5  0.5 0.284 0.11226952
+## 2   1.0  0.5 0.320 0.10154364
+## 3   2.0  0.5 0.428 0.13472606
+## 4   4.0  0.5 0.448 0.13439577
+## 5   0.5  1.0 0.268 0.10163114
+## 6   1.0  1.0 0.304 0.09651713</code></pre>
 <pre class="r"><code># getting the best model
 svm_model &lt;- svm_tune$best.model
 
