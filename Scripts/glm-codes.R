@@ -135,19 +135,25 @@ tab2
 # logistic regression model
 f_0 <- AHD ~ Age + RestBP + Chol + MaxHR + Oldpeak
 f_1 <- AHD ~ MaxHR + Oldpeak + RestBP
-f_2 <- AHD ~ RestBP + Chol + MaxHR + Oldpeak
-f_3 <- AHD ~ Chol + MaxHR + Oldpeak
-
+f_2 <- AHD ~ MaxHR + Oldpeak + Chol
+f_3 <- AHD ~ RestBP + Chol + MaxHR + Oldpeak
 f_9 <- AHD ~ . -X
 
-lgm_model = glm(f_3, data = data_train, family = binomial)
+lgm_model   = glm(f_0, data = data_train, family = binomial)
+lgm_model_1 = glm(f_1, data = data_train, family = binomial)
+lgm_model_2 = glm(f_2, data = data_train, family = binomial)
 summary(lgm_model)
+
+# variance importance of variables
+varImp(lgm_model)
 
 # odds ratio
 cbind(exp(confint(lgm_model)), Ods_Ratio = exp(coef(lgm_model)), Coef = coef(lgm_model))
 
 # Anova
-anova(lgm_model)
+anova(lgm_model_1, lgm_model_2)
+
+anova(mod_fit_one, mod_fit_two, test ="Chisq")
 
 # stepAIC
 steps <- stepAIC(lgm_model, trace = T)
@@ -229,13 +235,28 @@ pairs(AHD ~ Age + RestBP + Chol + MaxHR + Oldpeak,
       lower.panel = panel.cor) 
 
 #kfold
-trcontrol <- trainControl(method = "cv", number = 10)
-trcontrol
-train(f_0, data_train, method = 'glm', family = binomial, trcontrol = trcontrol)
+# https://www.r-bloggers.com/evaluating-logistic-regression-models/
+train_index <- createDataPartition(data_raw$AHD, p=0.8, list=F)
+training <- data_raw[ train_index, c(2, 5, 6, 9, 11,15)]
+testing <- data_raw[ -train_index, c(2, 5, 6, 9, 11,15)]
 
-cv_model <- cv.glm(data_train, lgm_model)
-cv_model$delta
-cv_model <- cv.glm(data_train, lgm_model, K = 10)
-cv_model$delta
-flds <- createFolds(data_train, k = 10, list = TRUE, returnTrain = FALSE)
-flds
+ctrl <- trainControl(method = "repeatedcv", 
+                     number = 10, repeats = 10, 
+                     savePredictions = TRUE)
+
+time.start <- Sys.time()
+mod_fit <- train(f_3, data=training, 
+                 method="glm", family="binomial",
+                 trControl = ctrl,
+                 tuneLength = 10)
+time.end <- Sys.time()
+round(time.end - time.start, 2)
+summary(mod_fit)
+mod_fit
+pred <- predict(mod_fit, newdata=training)
+confusionMatrix(data = pred, training$AHD)
+
+pred <- predict(mod_fit, newdata=testing)
+confusionMatrix(data = pred, testing$AHD)
+
+

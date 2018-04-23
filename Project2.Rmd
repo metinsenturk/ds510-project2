@@ -193,7 +193,7 @@ confmatrix(probs, data_test$AHD, db)
 ```{r finding best model with svm tune}
 # finding best model with svm tune
 if (!exists("svm_tune"))
-  svm_tune <- tune(svm, f_1, data = data_train, 
+  svm_tune <- tune(svm, AHD ~ Age + RestBP + Chol + MaxHR + Oldpeak, data = data_train, 
                  type = "C-classification",
                  kernel = "radial", 
                  decision.values = T,
