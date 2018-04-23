@@ -14,7 +14,7 @@ invisible(package.check(pkgs))
 
 # Functions ====
 
-confmatrix <- function(probs, actual, db) {
+confmatrix <- function(probs, actual, db = NULL) {
   # creates conf matrix and a set of results about confmatrix
   # args: 
   #   preds: output of predict function
@@ -27,7 +27,11 @@ confmatrix <- function(probs, actual, db) {
   rd <- 4
   
   # confusion matrix
-  preds <- ifelse(probs > db, 1, 0)
+  if (!is.null(db)) {
+    preds <- ifelse(probs > db, 1, 0)
+  } else {
+    preds <- probs
+  }
   tab1 <- table(predicted = preds, actual = actual)
   
   # misclassification error

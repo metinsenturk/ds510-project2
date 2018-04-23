@@ -176,17 +176,15 @@ db <- unname(cutoff_acc(probs, data_train$AHD)[2,1])
 
 # confusion matrix for train data
 probs = predict(lgm_model, data_train, type = "response")
-cfi_tr <- confmatrix(probs, data_train$AHD, db)
-cfi_tr$mtrx
-cfi_tr$info
+confmatrix(probs, data_train$AHD, db)
+
 ```
 
 ```{r confusion matrix for test}
 # confusion matrix for test data
 probs = predict(lgm_model, data_test, type = "response")
-cfi_te <- confmatrix(probs, data_test$AHD, db)
-cfi_te$mtrx
-cfi_te$info
+confmatrix(probs, data_test$AHD, db)
+
 ```
 
 #### Support Vector Machine (SVM) Approach

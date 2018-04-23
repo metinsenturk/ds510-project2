@@ -193,7 +193,7 @@ db <- unname(cutoff_acc(probs, data_train$AHD)[2,1])
 p_tr_probs = predict(lgm_model, data_train, type = "response")
 head(p_tr_probs)
 head(data_train)
-cfi_tr <- confmatrix(p_tr_probs, data_train$AHD, db)
+confmatrix(p_tr_probs, data_train$AHD, db)
 cfi_tr$mtrx
 cfi_tr$info
 
