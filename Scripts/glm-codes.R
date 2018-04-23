@@ -151,9 +151,8 @@ varImp(lgm_model)
 cbind(exp(confint(lgm_model)), Ods_Ratio = exp(coef(lgm_model)), Coef = coef(lgm_model))
 
 # Anova
-anova(lgm_model_1, lgm_model_2)
-
-anova(mod_fit_one, mod_fit_two, test ="Chisq")
+anova(lgm_model)
+anova(lgm_model_1, lgm_model_2, test ="Chisq")
 
 # stepAIC
 steps <- stepAIC(lgm_model, trace = T)

@@ -16,7 +16,7 @@ source("Scripts/utility_functions.R")
 source("Scripts/model_functions.R")
 
 # packages
-pkgs <- c("dplyr", "popbio", "e1071")
+pkgs <- c("dplyr", "popbio", "e1071", "caret")
 invisible(package.check(pkgs))
 ```
 
@@ -123,17 +123,38 @@ f_0 <- AHD ~ Age + RestBP + Chol + MaxHR + Oldpeak
 
 # other possible models
 f_1 <- AHD ~ MaxHR + Oldpeak + RestBP
-f_2 <- AHD ~ RestBP + Chol + MaxHR + Oldpeak
-f_3 <- AHD ~ Chol + MaxHR + Oldpeak
+f_2 <- AHD ~ MaxHR + Oldpeak + Chol
+f_3 <- AHD ~ RestBP + Chol + MaxHR + Oldpeak
 ```
 
 #### Logistic Regression Approach
+##### A Glance of All Variables
 ```{r glm }
 # f_1 <- AHD ~ MaxHR + Oldpeak + RestBP
-lgm_model = glm(AHD ~ Chol + MaxHR + Oldpeak, data = data_train, family = binomial)
+lgm_model = glm(AHD ~ Age + RestBP + Chol + MaxHR + Oldpeak, data = data_train, family = binomial)
 summary(lgm_model)
 ```
 
+```{r}
+# variance importance of variables
+varImp(lgm_model)
+```
+
+```{r}
+# analysis of variance of all variables
+anova(lgm_model)
+```
+
+```{r}
+# best 
+lgm_model_1 = glm(AHD ~ MaxHR + Oldpeak + RestBP, data = data_train, family = binomial)
+lgm_model_2 = glm(AHD ~ MaxHR + Oldpeak + Chol,   data = data_train, family = binomial)
+
+# Anova of two best models selected
+anova(lgm_model_1, lgm_model_2, test = "Chisq")
+```
+
+##### More Analysis on the Best Model
 ```{r odds ratio}
 # odds of variables in the model
 ort <- cbind(exp(confint(lgm_model)), 
@@ -182,6 +203,7 @@ confmatrix(probs, data_train$AHD, db)
 
 ```
 
+##### Model Validation 
 ```{r confusion matrix for test}
 # confusion matrix for test data
 probs = predict(lgm_model, data_test, type = "response")
