@@ -21,7 +21,7 @@ knitr::opts_chunk$set(echo = T, tidy = T)
 
 ```{r dependencies, include=FALSE}
 # seed
-set.seed(10)
+set.seed(3233)
 
 # local sources
 source("Scripts/utility_functions.R")
@@ -48,6 +48,8 @@ invisible(package.check(pkgs))
 ## Executive Summary
 
 Early diagnosis of the factors that increase lead to the heart disease can help in taking precautions in timely manner. The research revolves around predicting the most influential factors leading to the heart disease using data mining techniques.
+
+In this report, we tried to construct a model to predict the heart disease using two of well-known the classification methdods, logistic regression and support vector machines. We used "Chol", "MaxHR", "Oldpeak" out of all contuinuous type variables to predict the heart disease (AHD). According to our analysis with confusion matrices, we predict **74%** of the patients accurately in terms of their heart disease with logistic regression. Similarly, **73.6%** of patients are a also predicted with the use of support vector machines.
 
 ## Technical Analysis
 
@@ -191,9 +193,9 @@ varImp(lgm_model)
 
 Since we have multiple independent variables, we run chi square test to understand the relationship between predictor and each of the independent variables. From our analysis in below, we find MaxHR, Oldpeak and Age are of importance.
 
-```{r anova for all variables}
+```{r anova for all variables, echo=TRUE}
 # analysis of variance of all variables
-anova(lgm_model, test = "Chisq")
+invisible(anova(lgm_model, test = "Chisq"))
 ```
 
 However, further analysis on variables indicate age is not statistically significant as others. The following two models become a candidate to predict the presense of an heart disease. From these two, we implemented likelihood ratio test to observe the importance of "RestBP" and "Chol".
@@ -298,7 +300,6 @@ mod_fit <- train(AHD ~ MaxHR + Oldpeak + Chol, data=training,
                  method="glm", family="binomial",
                  trControl = ctrl,
                  tuneLength = 10)
-summary(mod_fit)
 ```
 
 The confision matrix for k-fold cross validation is used to examine accuracy and its significance value. The accuracy observed with k-fold cross validation is 0.72, which is similiar with our initial model's results.
@@ -358,14 +359,6 @@ svm_model <- svm_tune$best.model
 summary(svm_model)
 ```
 
-Below is the confusion matrix of SVM model. It is observed that SVM is slightly less accurate than logistic regression model.
-
-```{r confusion matrix on svm for train data}
-# confusion matrix for svm on train data
-preds <- predict(svm_model, data_raw)
-confmatrix(preds, data_raw$AHD)
-```
-
 ROC curve for the SVM Model is used to examine an optimal cutoff point. At left, we present probability distribution graph, the accuracy curve at the center and on the right is the ROC curve.
 
 ```{r svm roc curve on train data, echo=FALSE, fig.height=3, fig.width=9, fig.align="center", fig.cap="SVM ROC for Train Data"}
@@ -382,7 +375,7 @@ We will validate our model's accuracy with the test dataset. Below, confusion ma
 ```{r confusion matrix on svm for test data}
 # confusion matrix for svm on test data
 preds <- predict(svm_model, data_raw)
-confmatrix(preds, data_raw$AHD)
+confusionMatrix(preds, data_raw$AHD)
 ```
 
 #### Model Comparisions
@@ -394,7 +387,7 @@ rocplot_compare(probs_lgm, attrs_svm, data_train$AHD, data_raw$AHD)
 ```
 
 ### Conclusion
-In this report, we examined the presense of a heart disease from a set of variables including chollesterol, Age  and others provided in the dataset. We found logistic regression to be a better model for prediction.
+In this report, we examined the presense of a heart disease from a set of variables including chollesterol, Age and others provided in the dataset. We found logistic regression to be a better model for prediction.
 
 According to our model, the odds of one patient having the disease is highly effected by "Chol", "MaxHR" and "Oldpeak". The odds of having AHD disease is very high if a patient's oldpeak is increases by one unit. 
 
