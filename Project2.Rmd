@@ -3,12 +3,17 @@ title: "Examining Heart Disease"
 output: 
   html_document:
     toc: true
+    toc_float:
+      collapsed: false
     toc_depth: 6
+    theme: cerulean
+    highlight: tango
+    smart: true
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = T, tidy = T)
-knitr::knit_engines$set("txt")
+# “default”, “cerulean”, “journal”, “flatly”, “readable”, “spacelab”, “united”, “cosmo”, “lumen”, “paper”, “sandstone”, “simplex”, “yeti”
 ```
 
 ```{r dependencies, include=FALSE}
@@ -304,8 +309,8 @@ if (!exists("svm_tune"))
                  scale = F,
                  ranges = list(gamma = 2^(-1:2), cost = 2^(-1:10)))
 
-# first five performances
-head(svm_tune$performances)
+# first six performances
+# head(svm_tune$performances)
 ```
 
 According to our analysis, we found the best cost and gamma values as 1 and 2, respectively. 
@@ -326,7 +331,7 @@ preds <- predict(svm_model, data_train)
 confmatrix(preds, data_train$AHD)
 ```
 
-ROC curve for the SVM Model is used to examine an optimal cutoff point.
+ROC curve for the SVM Model is used to examine an optimal cutoff point. The distribution of models' prediction probabilities for classes are presented in the left graph.
 
 ```{r svm roc curve on train data, echo=FALSE, fig.height=3, fig.width=9, fig.align="center", fig.cap="SVM ROC for Train Data"}
 # roc curve graphs for svm on train data
