@@ -1,14 +1,17 @@
 ---
 title: "Examining Heart Disease"
-output: 
+output:
   html_document:
-    toc: true
-    toc_float:
-      collapsed: false
-    toc_depth: 6
-    theme: cerulean
     highlight: tango
-    smart: true
+    smart: yes
+    theme: cerulean
+    toc: yes
+    toc_depth: 6
+    toc_float:
+      collapsed: no
+  word_document:
+    toc: yes
+    toc_depth: '6'
 ---
 
 ```{r setup, include=FALSE}
@@ -22,7 +25,7 @@ source("Scripts/utility_functions.R")
 source("Scripts/model_functions.R")
 
 # packages
-pkgs <- c("dplyr", "popbio", "e1071", "caret")
+pkgs <- c("dplyr", "e1071", "caret")
 invisible(package.check(pkgs))
 ```
 
@@ -105,7 +108,7 @@ cont_list = list(
 )
 
 data_raw[, names(cont_list)] <- data.frame(sapply(cont_list, scale))
-data_raw %>%
+data_raw[, names(cont_list)] %>%
   select(-one_of(c("X"))) %>%
   select_if(is.numeric)  %>%
   head
@@ -113,7 +116,7 @@ data_raw %>%
 
 ```{r outlier plot, echo=FALSE, fig.height=4, fig.width=6, fig.align="center", fig.cap="Outlier Detection with Boxplot"}
 # outlier analysis and removal
-boxplot(data_raw[,c(2, 5, 6, 9, 11)], 
+boxplot(data_raw[, c(2, 5, 6, 9, 11)], 
         log = "x", 
         las = 2,
         boxwex = 0.3)
@@ -122,17 +125,15 @@ boxplot(data_raw[,c(2, 5, 6, 9, 11)],
 ```{r outlier removal}
 # outlier removals on detected variables
 data_raw$Chol = outlier_handler(data_raw$Chol)
-
 data_raw$RestBP = outlier_handler(data_raw$RestBP)
-
 data_raw$Oldpeak = outlier_handler(data_raw$Oldpeak)
 ```
 
 ```{r splitting dataset}
 # train and test datasets
 data_raw = data_raw[, c(2, 5, 6, 9, 11, 15)]
-data_train = data_raw[ 1:250,]
-data_test = data_raw[251:303,]
+data_train = data_raw[ 1:250, ]
+data_test = data_raw[251:303, ]
 ```
 
 ### Variables' Analysis
@@ -155,7 +156,7 @@ data.frame(all_diseased  = t[1,2] / sum(t),
 ```
 
 ### Models
-In order to understand patient's illness, we will use two classification model. We will use logistic regression model and support vector machines (SVM) in order to classify the disease. 
+In order to understand patient's illness, we will construct two different two classification model. We will use logistic regression model and support vector machines (SVM) in order to classify the disease. 
 
 ```{r possible regression models, include=FALSE}
 # model with all variables
@@ -227,18 +228,6 @@ ort <- cbind(exp(confint(lgm_model)),
 round(ort, 2)
 ```
 
-From our model, we use the predicted probabilities to draw sigmoid function on the dataset. 
-```{r model plot, echo=FALSE, fig.height=4, fig.width=6, fig.align="center", fig.cap="Model Fit in Data"}
-# plotting the model fit on the data
-probs <- predict(lgm_model, data_train, type = "response")
-logi.hist.plot(probs, 
-               data_train$AHD, 
-               boxp = F, 
-               type = "count", 
-               col = "gray", 
-               xlabel = "")
-```
-
 Below, the comparison of null deviance and residual deviance test the significance of variables in the model. The result indicate that each variable is statistically significant to present the heart disease.
 
 ```{r model interperetation 1}
@@ -258,7 +247,7 @@ According to the graph above, we determined the following cutoff value with resp
 
 ```{r cutoff detection}
 # accuracy and cutoff value
-cutoff_roc(probs, data_train$AHD)
+cutoff_roc(probs_lgm, data_train$AHD)
 ```
 
 We evaluate our model performance with a confusion matrix. According to confusion matrix, the misclassification error in our model is promising with a value of 0.26. Likewise, the model's accuracy for predicting correct results is 0.74. 
@@ -267,12 +256,20 @@ Additionally, we provide some informative raitos of guessing all true and false 
 
 ```{r confusion matrix for train}
 # decision boundary value from cutoff analysis
-db <- unname(cutoff_acc(probs, data_train$AHD)[2,1])
+db <- unname(cutoff_acc(probs_lgm, data_train$AHD)[2,1])
 
 # confusion matrix for train data
 probs = predict(lgm_model, data_train, type = "response")
-confmatrix(probs, data_train$AHD, db)
+confmatrix(probs_lgm, data_train$AHD, db)
 
+```
+
+```{r model plot, echo=FALSE, include=FALSE, fig.height=4, fig.width=6, fig.align="center", fig.cap="Model Fit in Data"}
+#From our model, we use the predicted probabilities to draw sigmoid function on the dataset. 
+# plotting the model fit on the data
+#probs <- predict(lgm_model, data_train, type = "response")
+#probs <- as.integer(unname(ifelse(probs > db, 1, 0)))
+#ggplot(data_train, aes(x=Chol, y=AHD)) + geom_point() + stat_smooth(method="glm", method.args=list(family="binomial"), se=FALSE)
 ```
 
 Lastly, in order to eliminate the chance of picking the best subset in the dataset for our selected model, we did a k-fold cross validation test with k = 10 for our analysis. For that purpose, we created train and test datasets in below. Hence, training the model with 80% of the dataset, which is roughly the same amount of observations with comparison to our initial analysis.
