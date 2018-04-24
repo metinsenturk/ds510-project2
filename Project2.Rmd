@@ -35,9 +35,18 @@ invisible(package.check(pkgs))
 ```
 
 ## Executive Summary
+Early diagnosis of the factors that increase lead to the heart disease can help in taking precautions in timely manner. The research revolves around predicting the most influential factors leading to the heart disease using data mining techniques.
+
 ## Technical Analysis
+There are two different approached used for making the predictions: 
+
+1)	Logistic Regression:
+      AHD , MaxHR,Oldpeak,RestBP are significant factors that can be used for prediction of a heart disease.
+      
+2)	Support Vector Machines:
+
 ### Introduction
-Testing.
+The 
 ```{r dataset}
 # importing dataset
 data_raw = read.csv("./Dataset/Heart.csv")
@@ -45,6 +54,7 @@ head(data_raw)
 ```
 
 ### Data Analysis
+For proper analysis of the data, the data needs to be passed to various step so as to get a clean data. More the clean more accurate is tha analysis.
 ```{r data structure}
 # examining variables
 str(data_raw)
