@@ -40,8 +40,34 @@ invisible(package.check(pkgs))
 ```
 
 ## Executive Summary
+
+Early diagnosis of the factors that increase lead to the heart disease can help in taking precautions in timely manner. The research revolves around predicting the most influential factors leading to the heart disease using data mining techniques.
+
 ## Technical Analysis
+
+There are two different approach used for making the predictions: 
+
+1)	Logistic Regression:
+
+      * AHD , MaxHR,Oldpeak,RestBP are significant factors that can be used for prediction of a heart disease.
+      
+      * Accuracy of the model is 80%
+      
+      * The confusion matrix shows 72% accuracy.
+      
+2)	Support Vector Machines:
+
+      * AHD, Age, RestBP, Chol, MaxHR, Oldpeak give the best result for prediction of the heart disease
+      
+      * 'C-classification' type model with kernel 'radial' is used as classifier.
+      
+      * The confusion matrix shows 80% accuracy. 
+
 ### Introduction
+
+We are investigating the Heart.csv which contains of various factor that can help in prediction of heart disease.
+Our objective to find a linear regression and svm model that is best for prediction of a heart disease.
+Here we will consider only the continuous variables to predict models.
 ```{r dataset}
 # importing dataset
 data_raw = read.csv("./Dataset/Heart.csv")
@@ -49,6 +75,10 @@ head(data_raw[ , 8:15])
 ```
 
 ### Data Analysis
+
+To meet the requirements of the prediction the data to be analysed should be analyzed, processed and cleaned.
+Here we examine the data, then further the outliers are removed and lastly the dataset is divided for testing and training.
+
 ```{r data structure}
 # examining variables
 str(data_raw)
@@ -106,6 +136,7 @@ data_test = data_raw[251:303,]
 ```
 
 ### Variables' Analysis
+Co-Relation between variables is an important aspect to be considered while predicting a model. Therefore, below in the graph, we represented the correlation values and graphs of variables with each other.
 ```{r correlation plotting}
 # correlation between predictor or variables
 pairs(AHD ~ Age + RestBP + Chol + MaxHR + Oldpeak, 
