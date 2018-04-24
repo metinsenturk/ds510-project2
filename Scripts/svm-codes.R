@@ -38,7 +38,7 @@ svm_model <- svm(f_1, data = data_train,
 summary(svm_model)
 
 # tuning
-svm_tune <- tune(svm, f_1, data = data_raw[, c(2, 5, 6, 9, 11, 15)], 
+svm_tune <- tune(svm, f_0, data = data_raw[, c(2, 5, 6, 9, 11, 15)], 
                  kernel = "radial", 
                  type = "C-classification",
                  decision.values=T,
@@ -61,7 +61,7 @@ attrs <- attributes(preds)$decision.values
 rocplot(attrs, data_train$AHD)
 
 # conf matrix
-preds <- predict(svm_model, data_train)
+preds <- predict(svm_model, data_train, type = "response")
 confmatrix(preds, data_train$AHD)
 
 # applying model to test data
