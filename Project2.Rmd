@@ -1,6 +1,9 @@
 ---
 title: "Examining Heart Disease"
 output:
+  word_document:
+    toc: yes
+    toc_depth: '6'
   html_document:
     highlight: tango
     smart: yes
@@ -9,9 +12,6 @@ output:
     toc_depth: 6
     toc_float:
       collapsed: no
-  word_document:
-    toc: yes
-    toc_depth: '6'
 ---
 
 ```{r setup, include=FALSE}
@@ -20,6 +20,9 @@ knitr::opts_chunk$set(echo = T, tidy = T)
 ```
 
 ```{r dependencies, include=FALSE}
+# seed
+set.seed(10)
+
 # local sources
 source("Scripts/utility_functions.R")
 source("Scripts/model_functions.R")
@@ -67,38 +70,26 @@ There are two different approach used for making the predictions:
       * The confusion matrix shows 80% accuracy. 
 
 ### Introduction
-
 We are investigating the Heart.csv which contains of various factor that can help in prediction of heart disease.
 Our objective to find a linear regression and svm model that is best for prediction of a heart disease.
 Here we will consider only the continuous variables to predict models.
+
 ```{r dataset}
 # importing dataset
 data_raw = read.csv("./Dataset/Heart.csv")
-head(data_raw[ , 8:15])
+head(data_raw[ , c(2, 5, 6, 9, 11, 15)])
 ```
 
 ### Data Analysis
-
 To meet the requirements of the prediction the data to be analysed should be analyzed, processed and cleaned.
 Here we examine the data, then further the outliers are removed and lastly the dataset is divided for testing and training.
-
-```{r data structure}
-# examining variables
-str(data_raw)
-```
-
-```{r na displaying}
-# examining NA values
-summarise_if(data_raw, is.atomic, funs(sum(is.na(.))))
-```
 
 ```{r predictor naming}
 # assigning 0 and 1 to predictor
 data_raw$AHD = as.factor(ifelse(data_raw$AHD == "Yes", 1, 0))
 ```
 
-```{r normalization}
-# normalization
+```{r, echo=FALSE, include=FALSE}
 cont_list = list(
   Age = data_raw$Age,
   RestBP = data_raw$RestBP,
@@ -106,12 +97,16 @@ cont_list = list(
   MaxHR = data_raw$MaxHR,
   Oldpeak = data_raw$Oldpeak
 )
+```
 
-data_raw[, names(cont_list)] <- data.frame(sapply(cont_list, scale))
+```{r normalization}
+# examining NA values
 data_raw[, names(cont_list)] %>%
-  select(-one_of(c("X"))) %>%
   select_if(is.numeric)  %>%
-  head
+  summarise_if(is.atomic, funs(sum(is.na(.))))
+
+# normalization
+data_raw[, names(cont_list)] <- data.frame(sapply(cont_list, scale))
 ```
 
 ```{r outlier plot, echo=FALSE, fig.height=4, fig.width=6, fig.align="center", fig.cap="Outlier Detection with Boxplot"}
@@ -134,6 +129,13 @@ data_raw$Oldpeak = outlier_handler(data_raw$Oldpeak)
 data_raw = data_raw[, c(2, 5, 6, 9, 11, 15)]
 data_train = data_raw[ 1:250, ]
 data_test = data_raw[251:303, ]
+```
+
+After removal of outliers and operations applied to our dataset in above, the following is the structure of the dataset that we will be using for analysis.
+
+```{r data structure}
+# examining variables
+str(data_raw)
 ```
 
 ### Variables' Analysis
@@ -288,7 +290,7 @@ The result of k-fold cv model is also indicating the same independent variables 
 ```{r k-fold model}
 # k-fold control
 ctrl <- trainControl(method = "repeatedcv", 
-                     number = 10, repeats = 10, 
+                     number = 10, repeats = 10,
                      savePredictions = TRUE)
 
 # k-fold training
@@ -337,7 +339,8 @@ svm_tune <- tune(svm, AHD ~ Chol + MaxHR + Oldpeak, data = data_raw,
                  kernel = "radial", 
                  decision.values = T,
                  scale = F,
-                 tunecontrol = tune.control(cross = 10, nrepeat = 5),
+                 tunecontrol = tune.control(cross = 10, nrepeat = 2),
+                 tuneLength = 8,
                  ranges = list(gamma = 2^(-1:2), cost = 2^(-1:10)))
   
 

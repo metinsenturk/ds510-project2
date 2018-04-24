@@ -38,17 +38,22 @@ svm_model <- svm(f_1, data = data_train,
 summary(svm_model)
 
 # tuning
-svm_tune <- tune(svm, f_0, data = data_raw[, c(2, 5, 6, 9, 11, 15)], 
+svm_tune <- tune(svm, f_2, data = data_raw, 
                  kernel = "radial", 
                  type = "C-classification",
-                 decision.values=T,
+                 decision.values = T,
                  scale = F,
-                 tunecontrol = tune.control(cross = 10),
+                 tunecontrol = tune.control(cross = 10, nrepeat = 2),
+                 tuneLength = 8,
                  ranges = list(gamma = 2^(-1:2), cost = 2^(-1:10)))
 svm_tune$best.parameters
 head(svm_tune$performances)
 
 svm_model <- svm_tune$best.model
+
+# conf matrix
+preds <- predict(svm_model, data_train, type = "response")
+confmatrix(preds, data_train$AHD)
 
 # plotting variables individually
 plot(data_train$Age, y = data_train$AHD, col = 2) 
@@ -60,9 +65,6 @@ preds <- predict(svm_model, data_train, decision.values = T)
 attrs <- attributes(preds)$decision.values
 rocplot(attrs, data_train$AHD)
 
-# conf matrix
-preds <- predict(svm_model, data_train, type = "response")
-confmatrix(preds, data_train$AHD)
 
 # applying model to test data
 # roc for test
