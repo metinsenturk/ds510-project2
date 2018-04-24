@@ -136,10 +136,10 @@ tab2
 f_0 <- AHD ~ Age + RestBP + Chol + MaxHR + Oldpeak
 f_1 <- AHD ~ MaxHR + Oldpeak + RestBP
 f_2 <- AHD ~ MaxHR + Oldpeak + Chol
-f_3 <- AHD ~ RestBP + Chol + MaxHR + Oldpeak
+f_3 <- AHD ~ MaxHR + Oldpeak + Age
 f_9 <- AHD ~ . -X
 
-lgm_model   = glm(f_0, data = data_train, family = binomial)
+lgm_model   = glm(f_3, data = data_train, family = binomial)
 lgm_model_1 = glm(f_1, data = data_train, family = binomial)
 lgm_model_2 = glm(f_2, data = data_train, family = binomial)
 summary(lgm_model)

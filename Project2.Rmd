@@ -3,12 +3,17 @@ title: "Examining Heart Disease"
 output: 
   html_document:
     toc: true
+    toc_float:
+      collapsed: false
     toc_depth: 6
+    theme: cerulean
+    highlight: tango
+    smart: true
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = T, tidy = T)
-knitr::knit_engines$set("txt")
+# “default”, “cerulean”, “journal”, “flatly”, “readable”, “spacelab”, “united”, “cosmo”, “lumen”, “paper”, “sandstone”, “simplex”, “yeti”
 ```
 
 ```{r dependencies, include=FALSE}
@@ -66,7 +71,7 @@ Here we will consider only the continuous variables to predict models.
 ```{r dataset}
 # importing dataset
 data_raw = read.csv("./Dataset/Heart.csv")
-head(data_raw)
+head(data_raw[ , 8:15])
 ```
 
 ### Data Analysis
@@ -125,8 +130,9 @@ data_raw$Oldpeak = outlier_handler(data_raw$Oldpeak)
 
 ```{r splitting dataset}
 # train and test datasets
-data_train = data_raw[ 1:250, c(2, 5, 6, 9, 11, 15)]
-data_test = data_raw[251:303, c(2, 5, 6, 9, 11, 15)]
+data_raw = data_raw[, c(2, 5, 6, 9, 11, 15)]
+data_train = data_raw[ 1:250,]
+data_test = data_raw[251:303,]
 ```
 
 ### Variables' Analysis
@@ -149,7 +155,9 @@ data.frame(all_diseased  = t[1,2] / sum(t),
 ```
 
 ### Models
-```{r possible regression models}
+In order to understand patient's illness, we will use two classification model. We will use logistic regression model and support vector machines (SVM) in order to classify the disease. 
+
+```{r possible regression models, include=FALSE}
 # model with all variables
 f_0 <- AHD ~ Age + RestBP + Chol + MaxHR + Oldpeak
 
@@ -160,38 +168,57 @@ f_3 <- AHD ~ RestBP + Chol + MaxHR + Oldpeak
 ```
 
 #### Logistic Regression Approach
+Logistic regression is a method to understand more about a predictor which has only two outcomes from a set of independent variables. Here in this dataset, we evaluated many variables together and presented the output in below. From many of our model, we will be presenting the following models.
+
+1. LGM with all variables.
+2. GLM with "MaxHR", "Oldpeak" and "Chol" variables.
+
 ##### A Glance of All Variables
+We started with using all the continuous type variables in the dataset. 
 ```{r glm}
 # f_1 <- AHD ~ MaxHR + Oldpeak + RestBP
 lgm_model = glm(AHD ~ Age + RestBP + Chol + MaxHR + Oldpeak, data = data_train, family = binomial)
-summary(lgm_model)
 ```
 
+In order to understand about variables, we evaluated their variances.
 ```{r variance importance evaluation}
 # variance importance of variables
 varImp(lgm_model)
 ```
 
+Since we have multiple independent variables, we run chi square test to understand the relationship between predictor and each of the independent variables. From our analysis in below, we find MaxHR, Oldpeak and Age are of importance.
+
 ```{r anova for all variables}
 # analysis of variance of all variables
-anova(lgm_model)
+anova(lgm_model, test = "Chisq")
 ```
+
+However, further analysis on variables indicate age is not statistically significant as others. The following two models become a candidate to predict the presense of an heart disease. From these two, we implemented likelihood ratio test to observe the importance of "RestBP" and "Chol".
 
 ```{r comparison between models}
 # best 
-lgm_model_1 = glm(AHD ~ MaxHR + Oldpeak + RestBP, data = data_train, family = binomial)
-lgm_model_2 = glm(AHD ~ MaxHR + Oldpeak + Chol,   data = data_train, family = binomial)
+lgm_model_1 = glm(AHD ~ MaxHR + Oldpeak,          data = data_train, family = binomial)
+lgm_model_2 = glm(AHD ~ MaxHR + Oldpeak + RestBP, data = data_train, family = binomial)
+lgm_model_3 = glm(AHD ~ MaxHR + Oldpeak + Chol,   data = data_train, family = binomial)
 
 # Anova of two best models selected
-anova(lgm_model_1, lgm_model_2, test = "Chisq")
+anova(lgm_model_1, lgm_model_2, test = "LRT")
+
+# Anova of two best models selected
+anova(lgm_model_1, lgm_model_3, test = "LRT")
 ```
+
+According to the likelihood ratio test results of anova, "Chol" values are statistically more significant than "RestBP" values, therefore we picked "MaxHR", "Oldpeak" and "Chol" to construct our model in classification of heart diseases.
 
 ```{r selected model assigning, include=FALSE}
 # assigning the selected model
-lgm_model <- lgm_model_2
+lgm_model <- lgm_model_3
+summary(lgm_model)
 ```
 
 ##### More Analysis on the Best Model
+To examine our model we applied some statistical tests for further analysis on the model. Below, the odds of having a heart disease (AHD) is 2.40 times higher in one unit increase of "Oldpeak". Likewise, 1 unit of "Chol" increase in a patient can increase the odds of having a heart disease 1.49 times. 
+
 ```{r odds ratio}
 # odds of variables in the model
 ort <- cbind(exp(confint(lgm_model)), 
@@ -200,6 +227,7 @@ ort <- cbind(exp(confint(lgm_model)),
 round(ort, 2)
 ```
 
+From our model, we use the predicted probabilities to draw sigmoid function on the dataset. 
 ```{r model plot, echo=FALSE, fig.height=4, fig.width=6, fig.align="center", fig.cap="Model Fit in Data"}
 # plotting the model fit on the data
 probs <- predict(lgm_model, data_train, type = "response")
@@ -211,24 +239,31 @@ logi.hist.plot(probs,
                xlabel = "")
 ```
 
+Below, the comparison of null deviance and residual deviance test the significance of variables in the model. The result indicate that each variable is statistically significant to present the heart disease.
+
 ```{r model interperetation 1}
-# goodness-of-fit test
-with(lgm_model, 
-     pchisq(null.deviance - deviance, 
-            df.null - df.residual, 
-            lower.tail = F))
+# chi square goodness-of-fit test
+anova(lgm_model, update(lgm_model, ~ 0), test="Chisq")
 ```
+
+Reciever Operating Characteristic (ROC) curve is used to find a good decision boundary point. The predictions from the dataset are evaluated in terms of true positive (tpr) and false positive (fpr) rates are plotted in below. A curve in the upper left side of the ROC curve represents our model is presenting fruitful outcome.
 
 ```{r cutoff plot, echo=FALSE, fig.height=3, fig.width=9, fig.align="center", fig.cap="Cutoff Value Plots"}
 # plots for roc, accuracy and prob dist hist
-probs <- predict(lgm_model, data_train, type = "response")
-rocplot(probs, data_train$AHD)
+probs_lgm <- predict(lgm_model, data_train, type = "response")
+rocplot(probs_lgm, data_train$AHD)
 ```
+
+According to the graph above, we determined the following cutoff value with respect to it's accuracy for our model.
 
 ```{r cutoff detection}
 # accuracy and cutoff value
-cutoff_acc(probs, data_train$AHD)
+cutoff_roc(probs, data_train$AHD)
 ```
+
+We evaluate our model performance with a confusion matrix. According to confusion matrix, the misclassification error in our model is promising with a value of 0.26. Likewise, the model's accuracy for predicting correct results is 0.74. 
+
+Additionally, we provide some informative raitos of guessing all true and false in order to compare accuracy and mse. 
 
 ```{r confusion matrix for train}
 # decision boundary value from cutoff analysis
@@ -240,12 +275,18 @@ confmatrix(probs, data_train$AHD, db)
 
 ```
 
+Lastly, in order to eliminate the chance of picking the best subset in the dataset for our selected model, we did a k-fold cross validation test with k = 10 for our analysis. For that purpose, we created train and test datasets in below. Hence, training the model with 80% of the dataset, which is roughly the same amount of observations with comparison to our initial analysis.
+
 ```{r k-fold dataset}
 # creating training and test dataset
 train_index <- createDataPartition(data_raw$AHD, p=0.8, list=F)
-training <- data_raw[ train_index, c(2, 5, 6, 9, 11,15)]
-testing <- data_raw[ -train_index, c(2, 5, 6, 9, 11,15)]
+training <- data_raw[ train_index, ]
+testing <- data_raw[ -train_index, ]
 ```
+
+We constructed a k-fold cross validation with 10 repeats and 10 folds. According to the results of k-fold cross validation test, we found the model we picked presents similiar to our initial analysis. 
+
+The result of k-fold cv model is also indicating the same independent variables as from our presented model's variables. Therefore, we proved that the presented model is behaving as our first analysis.
 
 ```{r k-fold model}
 # k-fold control
@@ -259,8 +300,9 @@ mod_fit <- train(AHD ~ MaxHR + Oldpeak + Chol, data=training,
                  trControl = ctrl,
                  tuneLength = 10)
 summary(mod_fit)
-mod_fit
 ```
+
+The confision matrix for k-fold cross validation is used to examine accuracy and its significance value. The accuracy observed with k-fold cross validation is 0.72, which is similiar with our initial model's results.
 
 ```{r k-fold confusion matrix}
 # confusion matrix results for training data
@@ -269,33 +311,44 @@ confusionMatrix(data = pred, training$AHD)
 ```
 
 ##### Model Validation 
+To validate our model, we used test dataset in the presented model that we subsetted to present model's success. It is observed that our model acts slightly less accurate with test data than in training.
+
 ```{r confusion matrix for test}
-# confusion matrix for test data
+# confusion matrix for test data (Presented Model)
 probs = predict(lgm_model, data_test, type = "response")
 confmatrix(probs, data_test$AHD, db)
 
 ```
 
+Lastly, the testing dataset created from k-fold cross validation subset is analyzed with our model. Here, k-fold cross validation results with the test dataset is presents better accuracy than our presented model in the test dataset.
+
 ```{r confusion matrix for test with k-fold}
-# k-fold validation for test data
+# k-fold validation for test data (k-fold analysis Model)
 pred <- predict(mod_fit, newdata=testing)
 confusionMatrix(data = pred, testing$AHD)
 ```
 
-#### Support Vector Machine (SVM) Approach
+#### Support Vector Machine Approach
+##### Model Analysis
+Another approach we used to to predict the presense of the heart disease is support vector machines (SVM). SVM divides the dataset into classes with the use of hyperplanes. 
+Below, we used svm to create a model for our dataset. Since we implemented normalization, we turned down the scale option for svm. Additionally, we did k-fold cross validation with 10 folds. We found the best SVM with the tune function.
+
 ```{r finding best model with svm tune}
 # finding best model with svm tune
-if (!exists("svm_tune"))
-  svm_tune <- tune(svm, AHD ~ Age + RestBP + Chol + MaxHR + Oldpeak, data = data_train, 
+svm_tune <- tune(svm, AHD ~ Chol + MaxHR + Oldpeak, data = data_raw, 
                  type = "C-classification",
                  kernel = "radial", 
                  decision.values = T,
                  scale = F,
+                 tunecontrol = tune.control(cross = 10, nrepeat = 5),
                  ranges = list(gamma = 2^(-1:2), cost = 2^(-1:10)))
+  
 
-# first five performances
-head(svm_tune$performances)
+# first six performances
+# head(svm_tune$performances)
 ```
+
+According to our analysis, we found the best cost and gamma values as 0.5 and 0.5, respectively. Therefore, we are selecting the best model out of the tune function.
 
 ```{r getting best model from tune}
 # getting the best model
@@ -305,38 +358,42 @@ svm_model <- svm_tune$best.model
 summary(svm_model)
 ```
 
+Below is the confusion matrix of SVM model. It is observed that SVM is slightly less accurate than logistic regression model.
+
 ```{r confusion matrix on svm for train data}
 # confusion matrix for svm on train data
-preds <- predict(svm_model, data_train)
-confmatrix(preds, data_train$AHD)
+preds <- predict(svm_model, data_raw)
+confmatrix(preds, data_raw$AHD)
 ```
+
+ROC curve for the SVM Model is used to examine an optimal cutoff point. At left, we present probability distribution graph, the accuracy curve at the center and on the right is the ROC curve.
 
 ```{r svm roc curve on train data, echo=FALSE, fig.height=3, fig.width=9, fig.align="center", fig.cap="SVM ROC for Train Data"}
 # roc curve graphs for svm on train data
-preds1 <- predict(svm_model, data_train, decision.values = T)
-attrs1 <- attributes(preds1)$decision.values
+preds_svm <- predict(svm_model, data_raw, decision.values = T)
+attrs_svm <- attributes(preds_svm)$decision.values
 
-rocplot(attrs1, data_train$AHD)
+rocplot(attrs_svm, data_raw$AHD)
 ```
+
+##### Model Validation
+We will validate our model's accuracy with the test dataset. Below, confusion matrix presents the spesifity and sensitivity of our model on test data.
 
 ```{r confusion matrix on svm for test data}
 # confusion matrix for svm on test data
-preds <- predict(svm_model, data_test)
-confmatrix(preds, data_test$AHD)
+preds <- predict(svm_model, data_raw)
+confmatrix(preds, data_raw$AHD)
 ```
 
-```{r svm roc curve on test data, echo=FALSE, fig.height=3, fig.width=9, fig.align="center", fig.cap="SVM ROC for Test Data"}
-# roc curve graphs for svm on test data
-preds2 <- predict(svm_model, data_test, decision.values = T)
-attrs2 <- attributes(preds2)$decision.values
-
-rocplot(attrs2, data_test$AHD)
-```
+#### Model Comparisions
+Lastly, we compared our results of two models the ROC curve. It is observed that logistic regression presents better results than svm as a classifier for our dataset.
 
 ```{r comparing rocs, echo=FALSE, fig.height=3, fig.width=7, fig.align="center", fig.cap="Comparison between ROC Curves"}
 # comparing rocs
-rocplot_compare(attrs1, attrs2, data_train$AHD, data_test$AHD)
+rocplot_compare(probs_lgm, attrs_svm, data_train$AHD, data_raw$AHD)
 ```
 
 ### Conclusion
+In this report, we examined the presense of a heart disease from a set of variables including chollesterol, Age and etc. We found logistic regression to be a better model for prediction.
+
 

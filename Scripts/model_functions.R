@@ -107,9 +107,9 @@ rocplot_compare <- function(train_predictions, test_predictions, train_actual, t
   
   #plotting
   par(mfrow = c(1,2))
-  plot(perf_tr, col=rainbow(7), main="ROC - Train Data", ...)
+  plot(perf_tr, col=rainbow(7), main="ROC - LGM", ...)
   abline(0, 1)
-  plot(perf_te, col=rainbow(7), main="ROC - Test Data", ...)
+  plot(perf_te, col=rainbow(7), main="ROC - SVM", ...)
   abline(0, 1)
   par(mfrow = c(1,1))
 }
