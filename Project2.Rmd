@@ -100,8 +100,9 @@ data_raw$Oldpeak = outlier_handler(data_raw$Oldpeak)
 
 ```{r splitting dataset}
 # train and test datasets
-data_train = data_raw[ 1:250, c(2, 5, 6, 9, 11, 15)]
-data_test = data_raw[251:303, c(2, 5, 6, 9, 11, 15)]
+data_raw = data_raw[, c(2, 5, 6, 9, 11, 15)]
+data_train = data_raw[ 1:250,]
+data_test = data_raw[251:303,]
 ```
 
 ### Variables' Analysis
@@ -219,8 +220,8 @@ Reciever Operating Characteristic (ROC) curve is used to find a good decision bo
 
 ```{r cutoff plot, echo=FALSE, fig.height=3, fig.width=9, fig.align="center", fig.cap="Cutoff Value Plots"}
 # plots for roc, accuracy and prob dist hist
-probs <- predict(lgm_model, data_train, type = "response")
-rocplot(probs, data_train$AHD)
+probs_lgm <- predict(lgm_model, data_train, type = "response")
+rocplot(probs_lgm, data_train$AHD)
 ```
 
 According to the graph above, we determined the following cutoff value for our model.
@@ -249,8 +250,8 @@ Lastly, in order to eliminate the chance of picking the best subset in the datas
 ```{r k-fold dataset}
 # creating training and test dataset
 train_index <- createDataPartition(data_raw$AHD, p=0.8, list=F)
-training <- data_raw[ train_index, c(2, 5, 6, 9, 11,15)]
-testing <- data_raw[ -train_index, c(2, 5, 6, 9, 11,15)]
+training <- data_raw[ train_index, ]
+testing <- data_raw[ -train_index, ]
 ```
 
 We constructed a 10-fold cross validation with 10 repeats. According to the results of k-fold cross validation test, we found the model we picked presents similiar to our initial analysis. Therefore, we proved that the presented model is behaving as our first analysis.
@@ -295,25 +296,26 @@ pred <- predict(mod_fit, newdata=testing)
 confusionMatrix(data = pred, testing$AHD)
 ```
 
-#### Support Vector Machine (SVM) Approach
+#### Support Vector Machine Approach
 ##### Model Analysis
-Another approach we used to to predict the presense of the heart disease is support vector machines. SVM divides the dataset into classes with the use of hyperplanes. Below, we found the best SVM with the tune function.
+Another approach we used to to predict the presense of the heart disease is support vector machines (SVM). SVM divides the dataset into classes with the use of hyperplanes. Below, we found the best SVM with the tune function.
 
 ```{r finding best model with svm tune}
 # finding best model with svm tune
-if (!exists("svm_tune"))
-  svm_tune <- tune(svm, AHD ~ Chol + MaxHR + Oldpeak, data = data_train, 
+svm_tune <- tune(svm, AHD ~ Chol + MaxHR + Oldpeak, data = data_raw, 
                  type = "C-classification",
                  kernel = "radial", 
                  decision.values = T,
                  scale = F,
+                 tunecontrol = tune.control(cross = 10),
                  ranges = list(gamma = 2^(-1:2), cost = 2^(-1:10)))
+  
 
 # first six performances
 # head(svm_tune$performances)
 ```
 
-According to our analysis, we found the best cost and gamma values as 1 and 2, respectively. 
+According to our analysis, we found the best cost and gamma values as 0.5 and 0.5, respectively. 
 
 ```{r getting best model from tune}
 # getting the best model
@@ -327,18 +329,18 @@ With SVM, we are having better results than logistic regression.
 
 ```{r confusion matrix on svm for train data}
 # confusion matrix for svm on train data
-preds <- predict(svm_model, data_train)
-confmatrix(preds, data_train$AHD)
+preds <- predict(svm_model, data_raw)
+confmatrix(preds, data_raw$AHD)
 ```
 
 ROC curve for the SVM Model is used to examine an optimal cutoff point. The distribution of models' prediction probabilities for classes are presented in the left graph.
 
 ```{r svm roc curve on train data, echo=FALSE, fig.height=3, fig.width=9, fig.align="center", fig.cap="SVM ROC for Train Data"}
 # roc curve graphs for svm on train data
-preds1 <- predict(svm_model, data_train, decision.values = T)
-attrs1 <- attributes(preds1)$decision.values
+preds_svm <- predict(svm_model, data_raw, decision.values = T)
+attrs_svm <- attributes(preds_svm)$decision.values
 
-rocplot(attrs1, data_train$AHD)
+rocplot(attrs_svm, data_raw$AHD)
 ```
 
 ##### Model Validation
@@ -346,23 +348,15 @@ We will validate our model's accuracy with the test dataset. Below, confusion ma
 
 ```{r confusion matrix on svm for test data}
 # confusion matrix for svm on test data
-preds <- predict(svm_model, data_test)
-confmatrix(preds, data_test$AHD)
-```
-
-```{r svm roc curve on test data, echo=FALSE, include=FALSE, fig.height=3, fig.width=9, fig.align="center", fig.cap="SVM ROC for Test Data"}
-# roc curve graphs for svm on test data
-preds2 <- predict(svm_model, data_test, decision.values = T)
-attrs2 <- attributes(preds2)$decision.values
-
-rocplot(attrs2, data_test$AHD)
+preds <- predict(svm_model, data_raw)
+confmatrix(preds, data_raw$AHD)
 ```
 
 We compared our results of train and test data and draw the ROC curve. It is observed that the train data presents better results than test data with the use of SVM as a classifier.
 
 ```{r comparing rocs, echo=FALSE, fig.height=3, fig.width=7, fig.align="center", fig.cap="Comparison between ROC Curves"}
 # comparing rocs
-rocplot_compare(attrs1, attrs2, data_train$AHD, data_test$AHD)
+rocplot_compare(probs_lgm, attrs_svm, data_train$AHD, data_raw$AHD)
 ```
 
 ### Conclusion

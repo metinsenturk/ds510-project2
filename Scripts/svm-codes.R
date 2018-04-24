@@ -23,8 +23,8 @@ if (!exists(vars)) {
 }
 
 # datasets updated with only cont type variables
-data_train <- data_train[, c(2, 5, 6, 9, 11, 15)]
-data_test <- data_test[, c(2, 5, 6, 9, 11, 15)]
+data_train <- data_raw[, c(2, 5, 6, 9, 11, 15)]
+data_test <- data_raw[, c(2, 5, 6, 9, 11, 15)]
 
 # svm model ====
 # model
@@ -38,11 +38,12 @@ svm_model <- svm(f_1, data = data_train,
 summary(svm_model)
 
 # tuning
-svm_tune <- tune(svm, f_1, data = data_train, 
+svm_tune <- tune(svm, f_1, data = data_raw[, c(2, 5, 6, 9, 11, 15)], 
                  kernel = "radial", 
                  type = "C-classification",
                  decision.values=T,
                  scale = F,
+                 tunecontrol = tune.control(cross = 10),
                  ranges = list(gamma = 2^(-1:2), cost = 2^(-1:10)))
 svm_tune$best.parameters
 head(svm_tune$performances)
