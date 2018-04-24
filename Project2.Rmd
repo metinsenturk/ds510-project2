@@ -307,7 +307,7 @@ svm_tune <- tune(svm, AHD ~ Chol + MaxHR + Oldpeak, data = data_raw,
                  kernel = "radial", 
                  decision.values = T,
                  scale = F,
-                 tunecontrol = tune.control(cross = 10),
+                 tunecontrol = tune.control(cross = 10, nrepeat = 5),
                  ranges = list(gamma = 2^(-1:2), cost = 2^(-1:10)))
   
 
@@ -315,7 +315,7 @@ svm_tune <- tune(svm, AHD ~ Chol + MaxHR + Oldpeak, data = data_raw,
 # head(svm_tune$performances)
 ```
 
-According to our analysis, we found the best cost and gamma values as 0.5 and 0.5, respectively. 
+According to our analysis, we found the best cost and gamma values as 0.5 and 0.5, respectively. Therefore, we are selecting the best model out of the tune function.
 
 ```{r getting best model from tune}
 # getting the best model
@@ -325,7 +325,7 @@ svm_model <- svm_tune$best.model
 summary(svm_model)
 ```
 
-With SVM, we are having better results than logistic regression. 
+Below is the confusion matrix of SVM model. 
 
 ```{r confusion matrix on svm for train data}
 # confusion matrix for svm on train data
@@ -352,7 +352,8 @@ preds <- predict(svm_model, data_raw)
 confmatrix(preds, data_raw$AHD)
 ```
 
-We compared our results of train and test data and draw the ROC curve. It is observed that the train data presents better results than test data with the use of SVM as a classifier.
+#### Model Comparisions
+Lastly, we compared our results of two models the ROC curve. It is observed that logistic regression presents better results than svm as a classifier for our dataset.
 
 ```{r comparing rocs, echo=FALSE, fig.height=3, fig.width=7, fig.align="center", fig.cap="Comparison between ROC Curves"}
 # comparing rocs
@@ -360,6 +361,6 @@ rocplot_compare(probs_lgm, attrs_svm, data_train$AHD, data_raw$AHD)
 ```
 
 ### Conclusion
-
+In this report, we examined the presense of a heart disease from a set of variables including chollesterol, Age and etc. We found logistic regression to be a better model for prediction.
 
 
